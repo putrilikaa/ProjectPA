@@ -15,14 +15,25 @@ st.set_page_config(
 )
 
 # Fungsi untuk memuat model terkompresi
+@st.cache(allow_output_mutation=True)
 def load_compressed_model(file_path):
-    with lzma.open(file_path, 'rb') as file:
-        model = pickle.load(file)
-    return model
+    try:
+        with lzma.open(file_path, 'rb') as file:
+            model = pickle.load(file)
+        return model
+    except FileNotFoundError:
+        st.error(f"File '{file_path}' tidak ditemukan. Mohon pastikan file model tersedia di lokasi yang benar.")
+        return None
+    except Exception as e:
+        st.error(f"Error saat memuat model: {e}")
+        return None
 
 # Memuat model yang disimpan
-model_file = '/content/trans_model.pkl.xz'  # Sesuaikan path dengan lokasi model Anda
+model_file = 'trans_model.pkl.xz'  # Ubah sesuai dengan nama file model Anda
 trans_model = load_compressed_model(model_file)
+
+if trans_model is None:
+    st.stop()
 
 # Sidebar untuk navigasi
 with st.sidebar:
