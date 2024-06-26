@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 import pickle
+import lzma
 import pandas as pd
 import io
 import matplotlib.pyplot as plt
@@ -13,10 +14,15 @@ st.set_page_config(
     page_icon="💱"
 )
 
+# Fungsi untuk memuat model terkompresi
+def load_compressed_model(file_path):
+    with lzma.open(file_path, 'rb') as file:
+        model = pickle.load(file)
+    return model
+
 # Memuat model yang disimpan
-model_file = 'trans_model.pkl'  # Sesuaikan path dengan lokasi model Anda
-with open(model_file, 'rb') as file:
-    trans_model = pickle.load(file)
+model_file = '/content/trans_model.pkl.xz'  # Sesuaikan path dengan lokasi model Anda
+trans_model = load_compressed_model(model_file)
 
 # Sidebar untuk navigasi
 with st.sidebar:
@@ -148,4 +154,3 @@ elif selected == 'Info':
     - *AUC ROC (Area Under the Receiver Operating Characteristic Curve)* mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
     - *ROC (Receiver Operating Characteristic Curve)* adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
     """)
-    
