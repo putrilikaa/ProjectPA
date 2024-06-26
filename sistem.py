@@ -1,7 +1,8 @@
 import pandas as pd
 import pickle
+import lzma
 from sklearn.ensemble import RandomForestClassifier
-from imblearn.over_sampling import SMote
+from imblearn.over_sampling import SMOTE
 
 def train_model(data):
     # Preprocess data
@@ -19,28 +20,27 @@ def train_model(data):
     return model
 
 def save_model(model, file_path):
-    with open(file_path, 'wb') as file:
+    with lzma.open(file_path, 'wb') as file:
         pickle.dump(model, file)
 
 def load_model(file_path):
-    with open(file_path, 'rb') as file:
+    with lzma.open(file_path, 'rb') as file:
         model = pickle.load(file)
     return model
 
 def main():
     # Load data for training
-    path= 'Data_Raw.xlsx'  # Sesuaikan path dengan lokasi file Anda
+    path = '/content/Data_Raw.xlsx'  # Sesuaikan path dengan lokasi file Anda
     data = pd.read_excel(path)
 
     # Train model
     model = train_model(data)
 
     # Save model
-    save_model(model, "trans_model.pkl")
+    save_model(model, "/content/trans_model.pkl.xz")
 
     # Load model
-    loaded_model = load_model("trans_model.pkl")
+    loaded_model = load_model("/content/trans_model.pkl.xz")
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
-    
