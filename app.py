@@ -6,6 +6,7 @@ import pandas as pd
 import io
 import matplotlib.pyplot as plt
 import seaborn as sns
+from openpyxl import load_workbook
 
 # Konfigurasi halaman
 st.set_page_config(
@@ -101,10 +102,17 @@ elif selected == 'File Upload':
                 output = io.BytesIO()
                 with pd.ExcelWriter(output, engine='openpyxl') as writer:
                     data.to_excel(writer, index=False, sheet_name='Sheet1')
-                    workbook = writer.book
-                    worksheet = writer.sheets['Sheet1']
-                    worksheet.sheet_state = 'visible'  # Ensure sheet is visible
                 output.seek(0)
+
+                # Membuat workbook dan memastikan semua sheet visible
+                with io.BytesIO(output.getvalue()) as f:
+                    wb = load_workbook(f)
+                    for sheet in wb.sheetnames:
+                        wb[sheet].sheet_state = 'visible'
+                    with io.BytesIO() as out:
+                        wb.save(out)
+                        out.seek(0)
+                        output = out.read()
 
                 st.download_button(
                     label="Download hasil prediksi",
