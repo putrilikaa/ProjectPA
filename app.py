@@ -7,13 +7,6 @@ import io
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Konfigurasi halaman
-st.set_page_config(
-    page_title="Prediksi Transaksi",
-    layout="wide",
-    page_icon="💱"
-)
-
 # Fungsi untuk memuat model terkompresi
 @st.cache(allow_output_mutation=True)
 def load_compressed_model(file_path):
@@ -34,6 +27,13 @@ trans_model = load_compressed_model(model_file)
 
 if trans_model is None:
     st.stop()
+
+# Konfigurasi halaman Streamlit
+st.set_page_config(
+    page_title="Prediksi Transaksi",
+    layout="wide",
+    page_icon="💱"
+)
 
 # Sidebar untuk navigasi
 with st.sidebar:
