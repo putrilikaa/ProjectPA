@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import xlsxwriter  # Mengganti openpyxl dengan xlsxwriter
 
-# Konfigurasi halaman
+# Konfigurasi halaman Streamlit
 st.set_page_config(
     page_title="Prediksi Transaksi",
     layout="wide",
@@ -167,4 +167,3 @@ elif selected == 'Info':
     - *AUC ROC (Area Under the Receiver Operating Characteristic Curve)* mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
     - *ROC (Receiver Operating Characteristic Curve)* adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
     """)
-
