@@ -101,7 +101,9 @@ elif selected == 'File Upload':
                 output = io.BytesIO()
                 with pd.ExcelWriter(output, engine='openpyxl') as writer:
                     data.to_excel(writer, index=False, sheet_name='Sheet1')
-                    writer._save()  # Save the workbook explicitly
+                    workbook = writer.book
+                    worksheet = writer.sheets['Sheet1']
+                    worksheet.sheet_state = 'visible'  # Ensure sheet is visible
                 output.seek(0)
 
                 st.download_button(
