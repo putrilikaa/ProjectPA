@@ -105,19 +105,6 @@ elif selected == 'File Upload':
                 st.subheader('Karakteristik Jumlah Transaksi')
                 st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
 
-                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
-                output = io.BytesIO()
-                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                    data.to_excel(writer, index=False, sheet_name='Sheet1')
-                
-                output.seek(0)
-
-                st.download_button(
-                    label="Download hasil prediksi",
-                    data=output,
-                    file_name='hasil_prediksi.xlsx'
-                )
-
                 # Membuat Box Plot untuk TX_TIME_SECONDS
                 st.subheader('Boxplot Jeda Waktu Detik')
                 fig1, ax1 = plt.subplots(figsize=(10, 6))
