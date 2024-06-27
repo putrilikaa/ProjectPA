@@ -105,7 +105,7 @@ elif selected == 'File Upload':
                 st.subheader('Karakteristik Jumlah Transaksi')
                 st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
 
-                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter
+                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
                 output = io.BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                     data.to_excel(writer, index=False, sheet_name='Sheet1')
