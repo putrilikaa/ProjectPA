@@ -98,6 +98,13 @@ elif selected == 'File Upload':
                 st.write("Hasil Prediksi:")
                 st.write(data)
 
+                # Menampilkan tabel statistik deskriptif
+                st.subheader('Karakteristik Jeda Waktu Detik')
+                st.write(data['TX_TIME_SECONDS'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
+
+                st.subheader('Karakteristik Jumlah Transaksi')
+                st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
+
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter
                 output = io.BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
@@ -110,13 +117,6 @@ elif selected == 'File Upload':
                     data=output,
                     file_name='hasil_prediksi.xlsx'
                 )
-
-                # Menampilkan tabel statistik deskriptif
-                st.subheader('Karakteristik Jeda Waktu Detik')
-                st.write(data['TX_TIME_SECONDS'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
-
-                st.subheader('Karakteristik Jumlah Transaksi')
-                st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
 
                 # Membuat Box Plot untuk TX_TIME_SECONDS
                 st.subheader('Boxplot Jeda Waktu Detik')
