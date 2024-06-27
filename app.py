@@ -99,7 +99,7 @@ elif selected == 'File Upload':
 
                 # Mengkonversi DataFrame ke Excel dan membuat link download
                 output = io.BytesIO()
-                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                with pd.ExcelWriter(output, engine='openpyxl') as writer:
                     data.to_excel(writer, index=False, sheet_name='Sheet1')
                 output.seek(0)
 
@@ -165,3 +165,4 @@ elif selected == 'Info':
     - *AUC ROC (Area Under the Receiver Operating Characteristic Curve)* mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
     - *ROC (Receiver Operating Characteristic Curve)* adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
     """)
+
