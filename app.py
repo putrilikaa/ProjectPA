@@ -99,11 +99,8 @@ elif selected == 'File Upload':
 
                 # Mengkonversi DataFrame ke Excel dan membuat link download
                 output = io.BytesIO()
-                with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                     data.to_excel(writer, index=False, sheet_name='Sheet1')
-                    workbook = writer.book
-                    worksheet = writer.sheets['Sheet1']
-                    worksheet.sheet_state = 'visible'  # Ensure sheet is visible
                 output.seek(0)
 
                 st.download_button(
