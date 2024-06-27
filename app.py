@@ -1,171 +1,167 @@
 import streamlit as st
-import pandas as pd
+from streamlit_option_menu import option_menu
 import pickle
 import lzma
-from sklearn.ensemble import RandomForestClassifier
-from imblearn.over_sampling import SMOTE
+import pandas as pd
 import io
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Function to load and preprocess data for training
-def preprocess_data(path):
-    data = pd.read_excel(path)
-    X = data.drop(columns=['TX_FRAUD','ID','TRANSACTION_ID','TX_DATETIME','TX_TIME_DAYS','CUSTOMER_ID','TERMINAL_ID','TX_FRAUD_SCENARIO', 'Column2','Column1'])
-    y = data['TX_FRAUD']
-    return X, y
+# Konfigurasi halaman
+st.set_page_config(
+    page_title="Prediksi Transaksi",
+    layout="wide",
+    page_icon="💱"
+)
 
-# Function to train model
-def train_model(X, y):
-    # Apply SMOTE for handling imbalanced data
-    smote = SMOTE(random_state=42)
-    X_resampled, y_resampled = smote.fit_resample(X, y)
+# Fungsi untuk memuat model terkompresi
+@st.cache(allow_output_mutation=True)
+def load_compressed_model(file_path):
+    try:
+        with lzma.open(file_path, 'rb') as file:
+            model = pickle.load(file)
+        return model
+    except FileNotFoundError:
+        st.error(f"File '{file_path}' tidak ditemukan. Mohon pastikan file model tersedia di lokasi yang benar.")
+        return None
+    except Exception as e:
+        st.error(f"Error saat memuat model: {e}")
+        return None
 
-    # Train RandomForestClassifier
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X_resampled, y_resampled)
+# Memuat model yang disimpan
+model_file = 'trans_model.pkl.xz'  # Ubah sesuai dengan nama file model Anda
+trans_model = load_compressed_model(model_file)
 
-    return model
+if trans_model is None:
+    st.stop()
 
-# Function to save model
-def save_model(model, file_path):
-    with lzma.open(file_path, 'wb') as file:
-        pickle.dump(model, file)
-
-# Function to load model
-def load_model(file_path):
-    with lzma.open(file_path, 'rb') as file:
-        model = pickle.load(file)
-    return model
-
-def main():
-    st.set_page_config(
-        page_title="Prediksi Transaksi",
-        layout="wide",
-        page_icon="💱"
+# Sidebar untuk navigasi
+with st.sidebar:
+    selected = option_menu(
+        'Prediksi Transaksi',
+        [
+            'Manual Input',
+            'File Upload',
+            'Info'
+        ],
+        menu_icon='money-fill',
+        icons=['pencil', 'upload', 'info-circle'],
+        default_index=0
     )
 
-    st.sidebar.title('Navigation')
-    pages = ['Manual Input', 'File Upload', 'Info']
-    selected = st.sidebar.radio('Go to', pages)
+# Halaman input manual
+if selected == 'Manual Input':
+    st.title('Transaction Prediction - Manual Input')
 
-    if selected == 'Manual Input':
-        st.title('Transaction Prediction - Manual Input')
+    col1, col2 = st.columns(2)
 
-        col1, col2 = st.columns(2)
+    with col1:
+        TX_AMOUNT = st.text_input('Jumlah Transaksi', '')  # Mengganti label dengan Jumlah Transaksi
+    with col2:
+        TX_TIME_SECONDS = st.text_input('Jeda Waktu Transaksi (Detik)', '')  # Mengganti label dengan Jeda Waktu Transaksi (Detik)
 
-        with col1:
-            TX_AMOUNT = st.text_input('Transaction Amount', '')
-        with col2:
-            TX_TIME_SECONDS = st.text_input('Transaction Time Interval (Seconds)', '')
+    transaction_prediction = ''
 
-        transaction_prediction = ''
+    if st.button('Transaction Prediction Result'):
+        try:
+            user_input = [float(TX_AMOUNT), float(TX_TIME_SECONDS)]
+            transaction_diagnosis = trans_model.predict([user_input])
+            if transaction_diagnosis[0] == 1:
+                transaction_prediction = 'Transaksi anda tidak aman karena terjadi indikasi penipuan'
+            else:
+                transaction_prediction = 'Transaksi anda aman karena dilakukan secara sah'
+        except ValueError:
+            transaction_prediction = 'Harap masukkan nilai numerik yang valid untuk semua input'
+        
+        st.success(transaction_prediction)
 
-        if st.button('Transaction Prediction Result'):
-            try:
-                user_input = [float(TX_AMOUNT), float(TX_TIME_SECONDS)]
-                prediction = loaded_model.predict([user_input])
-                if prediction[0] == 1:
-                    transaction_prediction = 'Your transaction is unsafe due to fraud indication'
-                else:
-                    transaction_prediction = 'Your transaction is safe and legitimate'
-            except ValueError:
-                transaction_prediction = 'Please enter valid numeric values for all inputs'
+# Halaman upload file
+elif selected == 'File Upload':
+    st.title('Transaction Prediction - File Upload')
 
-            st.success(transaction_prediction)
+    uploaded_file = st.file_uploader("Upload file Excel dengan data transaksi", type=["xlsx"])
 
-    elif selected == 'File Upload':
-        st.title('Transaction Prediction - File Upload')
+    if uploaded_file is not None:
+        try:
+            data = pd.read_excel(uploaded_file)
+            st.write("Data yang diupload:")
+            st.write(data)
 
-        uploaded_file = st.file_uploader("Upload Excel file with transaction data", type=["xlsx"])
+            if 'TX_AMOUNT' in data.columns and 'TX_TIME_SECONDS' in data.columns:
+                user_inputs = data[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
+                predictions = trans_model.predict(user_inputs)
 
-        if uploaded_file is not None:
-            try:
-                data = pd.read_excel(uploaded_file)
-                st.write("Uploaded data:")
+                data['Prediction'] = predictions
+                data['Prediction'] = data['Prediction'].apply(lambda x: 'Transaksi tidak aman (indikasi penipuan)' if x == 1 else 'Transaksi aman')
+
+                st.write("Hasil Prediksi:")
                 st.write(data)
 
-                if 'TX_AMOUNT' in data.columns and 'TX_TIME_SECONDS' in data.columns:
-                    user_inputs = data[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
-                    predictions = loaded_model.predict(user_inputs)
+                # Mengkonversi DataFrame ke Excel dan membuat link download
+                output = io.BytesIO()
+                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                    data.to_excel(writer, index=False, sheet_name='Sheet1')
+                output.seek(0)
 
-                    data['Prediction'] = predictions
-                    data['Prediction'] = data['Prediction'].apply(lambda x: 'Unsafe transaction (fraud indication)' if x == 1 else 'Safe transaction')
+                st.download_button(
+                    label="Download hasil prediksi",
+                    data=output,
+                    file_name='hasil_prediksi.xlsx'
+                )
 
-                    st.write("Prediction Results:")
-                    st.write(data)
+                # Menampilkan tabel statistik deskriptif
+                st.subheader('Karakteristik Jeda Waktu Detik')
+                st.write(data['TX_TIME_SECONDS'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
 
-                    output = io.BytesIO()
-                    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                        data.to_excel(writer, index=False, sheet_name='Sheet1')
-                    output.seek(0)
+                st.subheader('Karakteristik Jumlah Transaksi')
+                st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
 
-                    st.download_button(
-                        label="Download prediction results",
-                        data=output,
-                        file_name='prediction_results.xlsx'
-                    )
+                # Membuat Box Plot untuk TX_TIME_SECONDS
+                st.subheader('Boxplot Jeda Waktu Detik')
+                fig1, ax1 = plt.subplots(figsize=(10, 6))
+                sns.boxplot(x=data['TX_TIME_SECONDS'], ax=ax1)
+                st.pyplot(fig1)
 
-                    st.subheader('Transaction Time Interval Characteristics')
-                    st.write(data['TX_TIME_SECONDS'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Mean', '50%': 'Median', 'std': 'Std'}))
+                # Membuat Box Plot untuk TX_AMOUNT
+                st.subheader('Boxplot Jumlah Transaksi')
+                fig2, ax2 = plt.subplots(figsize=(10, 6))
+                sns.boxplot(x=data['TX_AMOUNT'], ax=ax2)
+                st.pyplot(fig2)
 
-                    st.subheader('Transaction Amount Characteristics')
-                    st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Mean', '50%': 'Median', 'std': 'Std'}))
+            else:
+                st.error('File tidak memiliki kolom yang diperlukan: TX_AMOUNT, TX_TIME_SECONDS')
+        except Exception as e:
+            st.error(f"Error: {e}")
 
-                    st.subheader('Boxplot Transaction Time Interval')
-                    fig1, ax1 = plt.subplots(figsize=(10, 6))
-                    sns.boxplot(x=data['TX_TIME_SECONDS'], ax=ax1)
-                    st.pyplot(fig1)
+# Halaman informasi
+elif selected == 'Info':
+    st.title('Informasi Dashboard')
+    
+    st.write("""
+    *Random Forest* adalah salah satu algoritma machine learning yang umum digunakan dalam permasalahan klasifikasi atau prediksi. Pada kasus ini digunakan untuk memprediksi mana transaksi yang termasuk ke dalam kelas penipuan dan sah. Prediksi didasarkan pada jumlah transaksi dan jeda waktu transaksi (detik).
+    """)
 
-                    st.subheader('Boxplot Transaction Amount')
-                    fig2, ax2 = plt.subplots(figsize=(10, 6))
-                    sns.boxplot(x=data['TX_AMOUNT'], ax=ax2)
-                    st.pyplot(fig2)
+    # Menampilkan gambar Random Forest dengan st.image dan mengatur penempatan dengan CSS
+    st.markdown("""
+    <style>
+    .center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 100%;
+        height: auto;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-                else:
-                    st.error('File does not have required columns: TX_AMOUNT, TX_TIME_SECONDS')
-            except Exception as e:
-                st.error(f"Error: {e}")
-
-    elif selected == 'Info':
-        st.title('Dashboard Information')
-        
-        st.write("""
-        *Random Forest* is one of the commonly used machine learning algorithms for classification or prediction problems. In this case, it is used to predict which transactions fall into the fraud and legitimate classes. Predictions are based on transaction amount and transaction time interval (seconds).
-        """)
-
-        st.markdown("""
-        <style>
-        .center {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            max-width: 100%;
-            height: auto;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
-        st.markdown('<img src="https://cdn.prod.website-files.com/61af164800e38cf1b6c60b55/64c0c20d61bda9e68f630468_Random%20forest.webp" alt="Random Forest" width="400" class="center">', unsafe_allow_html=True)
-        
-        st.write("""
-        There are several metrics commonly used to determine how well a model performs, including:
-        
-        - *Specificity* measures the model's ability to correctly identify true negatives among all actual negative cases.
-        - *Sensitivity* measures the model's ability to correctly identify true positives among all actual positive cases.
-        - *Accuracy* measures how often the model makes correct predictions, both for positive and negative cases.
-        - *AUC ROC (Area Under the Receiver Operating Characteristic Curve)* measures the performance of a classification model at various decision thresholds.
-        - *ROC (Receiver Operating Characteristic Curve)* is a graph that illustrates the true positive rate (Sensitivity) against the false positive rate (1 - Specificity) for various threshold values.
-        """)
-
-    # Load and train model
-    data_path = '/content/Data_Raw.xlsx'  # Adjust path to your file location
-    X, y = preprocess_data(data_path)
-    loaded_model = train_model(X, y)
-
-    # Save and load model
-    save_model(loaded_model, "/content/trans_model.pkl.xz")
-    loaded_model = load_model("/content/trans_model.pkl.xz")
-
-if __name__ == "__main__":
-    main()
+    st.markdown('<img src="https://cdn.prod.website-files.com/61af164800e38cf1b6c60b55/64c0c20d61bda9e68f630468_Random%20forest.webp" alt="Random Forest" width="400" class="center">', unsafe_allow_html=True)
+    
+    st.write("""
+    Terdapat beberapa pengukuran yang biasa digunakan untuk menentukan seberapa baik model, antara lain:
+    
+    - *Spesifisitas (Specificity)* mengukur kemampuan model untuk dengan benar mengidentifikasi negatif sejati (true negatives) di antara semua kasus yang sebenarnya negatif.
+    - *Sensitivitas (Sensitivity)* mengukur kemampuan model untuk dengan benar mengidentifikasi positif sejati (true positives) di antara semua kasus yang sebenarnya positif.
+    - *Akurasi (Accuracy)* mengukur seberapa sering model membuat prediksi yang benar, baik untuk kasus positif maupun negatif.
+    - *AUC ROC (Area Under the Receiver Operating Characteristic Curve)* mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
+    - *ROC (Receiver Operating Characteristic Curve)* adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
+    """)
