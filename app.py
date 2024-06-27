@@ -108,17 +108,25 @@ elif selected == 'File Upload':
                 # Menampilkan dashboard visualisasi
                 st.subheader('Dashboard Visualisasi')
 
-                fig, ax = plt.subplots(1, 2, figsize=(15, 5))
+                fig, ax = plt.subplots(2, 2, figsize=(15, 10))
 
-                sns.histplot(data['TX_AMOUNT'], kde=True, ax=ax[0])
-                ax[0].set_title('Distribusi Jumlah Transaksi')
-                ax[0].set_xlabel('TX_AMOUNT')
-                ax[0].set_ylabel('Frekuensi')
+                sns.histplot(data['TX_AMOUNT'], kde=True, ax=ax[0, 0])
+                ax[0, 0].set_title('Distribusi Jumlah Transaksi')
+                ax[0, 0].set_xlabel('TX_AMOUNT')
+                ax[0, 0].set_ylabel('Frekuensi')
 
-                sns.histplot(data['TX_TIME_SECONDS'], kde=True, ax=ax[1])
-                ax[1].set_title('Distribusi Jeda Waktu Transaksi (Detik)')
-                ax[1].set_xlabel('TX_TIME_SECONDS')
-                ax[1].set_ylabel('Frekuensi')
+                sns.histplot(data['TX_TIME_SECONDS'], kde=True, ax=ax[0, 1])
+                ax[0, 1].set_title('Distribusi Jeda Waktu Transaksi (Detik)')
+                ax[0, 1].set_xlabel('TX_TIME_SECONDS')
+                ax[0, 1].set_ylabel('Frekuensi')
+
+                sns.boxplot(data['TX_AMOUNT'], ax=ax[1, 0])
+                ax[1, 0].set_title('Boxplot Jumlah Transaksi')
+                ax[1, 0].set_xlabel('TX_AMOUNT')
+
+                sns.boxplot(data['TX_TIME_SECONDS'], ax=ax[1, 1])
+                ax[1, 1].set_title('Boxplot Jeda Waktu Transaksi (Detik)')
+                ax[1, 1].set_xlabel('TX_TIME_SECONDS')
 
                 st.pyplot(fig)
 
