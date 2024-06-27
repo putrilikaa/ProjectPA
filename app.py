@@ -105,17 +105,18 @@ elif selected == 'File Upload':
                 st.subheader('Karakteristik Jumlah Transaksi')
                 st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
 
-                # Membuat Box Plot untuk TX_TIME_SECONDS
-                st.subheader('Boxplot Jeda Waktu Detik')
-                fig1, ax1 = plt.subplots(figsize=(10, 6))
-                sns.boxplot(x=data['TX_TIME_SECONDS'], ax=ax1)
-                st.pyplot(fig1)
+                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
+                output = io.BytesIO()
+                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                    data.to_excel(writer, index=False, sheet_name='Sheet1')
+                
+                output.seek(0)
 
-                # Membuat Box Plot untuk TX_AMOUNT
-                st.subheader('Boxplot Jumlah Transaksi')
-                fig2, ax2 = plt.subplots(figsize=(10, 6))
-                sns.boxplot(x=data['TX_AMOUNT'], ax=ax2)
-                st.pyplot(fig2)
+                st.download_button(
+                    label="Download hasil prediksi",
+                    data=output,
+                    file_name='hasil_prediksi.xlsx'
+                )
 
             else:
                 st.error('File tidak memiliki kolom yang diperlukan: TX_AMOUNT, TX_TIME_SECONDS')
