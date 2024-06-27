@@ -105,6 +105,23 @@ elif selected == 'File Upload':
                 st.subheader('Karakteristik Jumlah Transaksi')
                 st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
 
+                # Menampilkan dashboard visualisasi
+                st.subheader('Dashboard Visualisasi')
+
+                fig, ax = plt.subplots(1, 2, figsize=(15, 5))
+
+                sns.histplot(data['TX_AMOUNT'], kde=True, ax=ax[0])
+                ax[0].set_title('Distribusi Jumlah Transaksi')
+                ax[0].set_xlabel('TX_AMOUNT')
+                ax[0].set_ylabel('Frekuensi')
+
+                sns.histplot(data['TX_TIME_SECONDS'], kde=True, ax=ax[1])
+                ax[1].set_title('Distribusi Jeda Waktu Transaksi (Detik)')
+                ax[1].set_xlabel('TX_TIME_SECONDS')
+                ax[1].set_ylabel('Frekuensi')
+
+                st.pyplot(fig)
+
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
                 output = io.BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
@@ -155,4 +172,3 @@ elif selected == 'Info':
     - *AUC ROC (Area Under the Receiver Operating Characteristic Curve)* mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
     - *ROC (Receiver Operating Characteristic Curve)* adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
     """)
-
