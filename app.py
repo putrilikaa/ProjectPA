@@ -105,7 +105,7 @@ elif selected == 'File Upload':
                 st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
 
                 # Dropdown untuk memilih tipe plot
-                plot_type = st.selectbox('Pilih jenis plot:', ['Histogram', 'Boxplot'])
+                plot_type = st.selectbox('**Pilih jenis plot:**', ['Histogram', 'Boxplot'])
 
                 if plot_type == 'Histogram':
                     # Menampilkan histogram
