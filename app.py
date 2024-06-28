@@ -186,7 +186,7 @@ elif selected == 'Pemodelan Random Forest':
                 st.write(data_rf)
 
                 # Dropdown untuk memilih informasi yang ingin ditampilkan
-                info_type = st.selectbox('Pilih informasi yang ingin ditampilkan:', ['Metrik Evaluasi Model', 'Confusion Matrix'])
+                info_type = st.selectbox('**Pilih informasi yang ingin ditampilkan:**', ['Metrik Evaluasi Model', 'Confusion Matrix'])
 
                 if info_type == 'Metrik Evaluasi Model':
                     # Menampilkan metrik evaluasi
@@ -214,10 +214,10 @@ elif selected == 'Pemodelan Random Forest':
                     st.pyplot()
 
                     # Menambahkan penjelasan di bawah Confusion Matrix
-                    st.markdown(f"Transaksi yang sebenarnya sah dan diprediksi sebagai sah adalah sebesar {cm_rf[0, 0]} data")
-                    st.markdown(f"Transaksi yang sebenarnya sah tetapi diprediksi sebagai penipuan adalah sebesar {cm_rf[0, 1]} data")
-                    st.markdown(f"Transaksi yang sebenarnya penipuan dan diprediksi sebagai penipuan adalah sebesar {cm_rf[1, 1]} data")
-                    st.markdown(f"Transaksi yang sebenarnya penipuan tetapi diprediksi sebagai sah adalah sebesar {cm_rf[1, 0]} data")
+                    st.markdown(f"Transaksi yang sebenarnya **sah dan diprediksi sebagai sah** adalah sebesar {cm_rf[0, 0]} data")
+                    st.markdown(f"Transaksi yang sebenarnya **sah tetapi diprediksi sebagai penipuan** adalah sebesar {cm_rf[0, 1]} data")
+                    st.markdown(f"Transaksi yang sebenarnya **penipuan dan diprediksi sebagai penipuan** adalah sebesar {cm_rf[1, 1]} data")
+                    st.markdown(f"Transaksi yang sebenarnya **penipuan tetapi diprediksi sebagai sah** adalah sebesar {cm_rf[1, 0]} data")
 
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter
                 output_rf = io.BytesIO()
