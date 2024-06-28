@@ -6,7 +6,7 @@ import pandas as pd
 import io
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
+from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score, classification_report
 
 # Konfigurasi halaman Streamlit
 st.set_page_config(
@@ -43,10 +43,11 @@ with st.sidebar:
         [
             'Manual Input',
             'File Upload',
+            'Pemodelan Random Forest',
             'Info'
         ],
         menu_icon='money-fill',
-        icons=['pencil', 'upload', 'info-circle'],
+        icons=['pencil', 'upload', 'bar-chart', 'info-circle'],
         default_index=0
     )
 
@@ -165,6 +166,58 @@ elif selected == 'File Upload':
         except Exception as e:
             st.error(f"Error: {e}")
 
+# Halaman pemodelan Random Forest
+elif selected == 'Pemodelan Random Forest':
+    st.title('Pemodelan Random Forest')
+
+    st.write("""
+    Halaman ini digunakan untuk evaluasi model menggunakan pemodelan Random Forest. Data yang digunakan di sini adalah untuk evaluasi model dan tidak terkait dengan data yang diupload pada halaman sebelumnya.
+    """)
+
+    st.markdown("**Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan TX_FRAUD**")
+    st.markdown("**TX_AMOUNT:** Data jumlah transaksi")
+    st.markdown("**TX_TIME_SECONDS:** Data jeda waktu transaksi dalam detik")
+    st.markdown("**TX_FRAUD:** Status transaksi 1 (Penipuan) dan 0 (Sah)")
+    st.markdown("**NOTE:** Beri nama kolom sesuai keterangan di atas dan gunakan tanda titik (.) sebagai koma (,)")
+
+    uploaded_file_rf = st.file_uploader("", type=["xlsx"])
+
+    if uploaded_file_rf is not None:
+        try:
+            data_rf = pd.read_excel(uploaded_file_rf)
+            st.write("Data yang diupload untuk evaluasi model:")
+            st.write(data_rf)
+
+            if 'TX_AMOUNT' in data_rf.columns and 'TX_TIME_SECONDS' in data_rf.columns and 'TX_FRAUD' in data_rf.columns:
+                X_rf = data_rf[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
+                y_rf = data_rf['TX_FRAUD'].astype(int)
+
+                predictions_rf = trans_model.predict(X_rf)
+
+                st.subheader('Hasil Evaluasi Model')
+                st.write(f"Accuracy Score: {accuracy_score(y_rf, predictions_rf):.2f}")
+                st.write(f"Confusion Matrix:\n{confusion_matrix(y_rf, predictions_rf)}")
+                st.write(f"Classification Report:\n{classification_report(y_rf, predictions_rf)}")
+
+                st.subheader('ROC Curve and AUC')
+                roc_auc = roc_auc_score(y_rf, predictions_rf)
+                fpr, tpr, thresholds = roc_curve(y_rf, predictions_rf)
+                plt.figure()
+                plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.2f})')
+                plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+                plt.xlim([0.0, 1.0])
+                plt.ylim([0.0, 1.05])
+                plt.xlabel('False Positive Rate')
+                plt.ylabel('True Positive Rate')
+                plt.title('Receiver Operating Characteristic (ROC)')
+                plt.legend(loc="lower right")
+                st.pyplot(plt)
+
+            else:
+                st.error('File tidak memiliki kolom yang diperlukan: TX_AMOUNT, TX_TIME_SECONDS, TX_FRAUD')
+        except Exception as e:
+            st.error(f"Error: {e}")
+
 # Halaman informasi
 elif selected == 'Info':
     st.title('Informasi Dashboard')
@@ -197,4 +250,3 @@ elif selected == 'Info':
     - **AUC ROC (Area Under the Receiver Operating Characteristic Curve)** mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
     - **ROC (Receiver Operating Characteristic Curve)** adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
     """)
-
