@@ -84,6 +84,10 @@ elif selected == 'File Upload':
 
     st.write("Halaman ini digunakan untuk memprediksi status transaksi yang anda lakukan sah atau terindikasi penipuan")
 
+    st.write("**TX_AMOUNT**: Jumlah transaksi")
+    st.write("**TX_TIME_SECONDS**: Jeda waktu transaksi dalam detik")
+    st.write("**Note**: File harus berformat excel")
+
     uploaded_file = st.file_uploader('**Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS**', type=["xlsx"])
 
     if uploaded_file is not None:
@@ -169,6 +173,11 @@ elif selected == 'Pemodelan Random Forest':
     st.title('Pemodelan Random Forest')
 
     st.write("Halaman ini digunakan untuk menghasilkan model dengan menggunakan algoritma ***Random Forest***")
+
+    st.write("**TX_AMOUNT**: Jumlah transaksi")
+    st.write("**TX_TIME_SECONDS**: Jeda waktu transaksi dalam detik")
+    st.write("**TX_FRAUD**: Status transaksi yang mana 0 (sah) dan 1 (penipuan)")
+    st.write("**Note**: File harus berformat excel")
 
     uploaded_file_rf = st.file_uploader('**Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan TX_FRAUD**', type=["xlsx"])
 
