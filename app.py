@@ -71,7 +71,7 @@ if selected == 'Manual Input':
             if transaction_diagnosis[0] == 1:
                 transaction_prediction = 'Transaksi yang anda lakukan tidak aman karena terjadi indikasi penipuan'
             else:
-                transaction_prediction = 'Transaksi yang anda lakukan anda aman karena dilakukan secara sah'
+                transaction_prediction = 'Transaksi yang anda lakukan aman karena dilakukan secara sah'
         except ValueError:
             transaction_prediction = 'Harap masukkan nilai numerik yang valid untuk semua input'
         
