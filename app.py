@@ -1,13 +1,11 @@
 import streamlit as st
-from streamlit_option_menu import option_menu
 import pickle
 import lzma
 import pandas as pd
 import io
 import matplotlib.pyplot as plt
 import seaborn as sns
-import xlsxwriter
-from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
+from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score, roc_curve
 
 # Konfigurasi halaman Streamlit
 st.set_page_config(
@@ -39,17 +37,10 @@ if trans_model is None:
 
 # Sidebar untuk navigasi
 with st.sidebar:
-    selected = option_menu(
-        'Prediksi Transaksi',
-        [
-            'Manual Input',
-            'File Upload',
-            'Pemodelan Random Forest',
-            'Info'
-        ],
-        menu_icon='money-fill',
-        icons=['pencil', 'upload', 'bar-chart', 'info-circle'],
-        default_index=0
+    selected = st.selectbox(
+        'Navigasi',
+        ['Manual Input', 'File Upload', 'Pemodelan Random Forest', 'Info'],
+        index=2
     )
 
 # Halaman input manual
@@ -59,9 +50,9 @@ if selected == 'Manual Input':
     col1, col2 = st.columns(2)
 
     with col1:
-        TX_AMOUNT = st.text_input('Jumlah Transaksi', '')  # Mengganti label dengan Jumlah Transaksi
+        TX_AMOUNT = st.text_input('Jumlah Transaksi', '')
     with col2:
-        TX_TIME_SECONDS = st.text_input('Jeda Waktu Transaksi (Detik)', '')  # Mengganti label dengan Jeda Waktu Transaksi (Detik)
+        TX_TIME_SECONDS = st.text_input('Jeda Waktu Transaksi (Detik)', '')
 
     transaction_prediction = ''
 
@@ -82,13 +73,13 @@ if selected == 'Manual Input':
 elif selected == 'File Upload':
     st.title('Prediksi Transaksi - Upload File Excel')
 
-    st.write("Halaman ini digunakan untuk memprediksi status transaksi yang anda lakukan sah atau terindikasi penipuan")
+    st.write("Halaman ini digunakan untuk memprediksi status transaksi sah atau terindikasi penipuan")
 
     st.write("**TX_AMOUNT**: Jumlah transaksi")
     st.write("**TX_TIME_SECONDS**: Jeda waktu transaksi dalam detik")
     st.write("**Note**: File harus berformat excel")
 
-    uploaded_file = st.file_uploader('**Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS**', type=["xlsx"])
+    uploaded_file = st.file_uploader('Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS', type=["xlsx"])
 
     if uploaded_file is not None:
         try:
@@ -124,7 +115,6 @@ elif selected == 'File Upload':
                     ax_hist.set_xlabel('TX_AMOUNT')
                     ax_hist.set_ylabel('Frekuensi')
                     st.pyplot(fig_hist)
-                    st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berbentuk tidak normal.")
 
                     st.subheader('Distribusi Jeda Waktu Transaksi (Detik)')
                     fig_hist_time, ax_hist_time = plt.subplots()
@@ -132,7 +122,6 @@ elif selected == 'File Upload':
                     ax_hist_time.set_xlabel('TX_TIME_SECONDS')
                     ax_hist_time.set_ylabel('Frekuensi')
                     st.pyplot(fig_hist_time)
-                    st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berbentuk tidak normal.")
 
                 elif plot_type == 'Boxplot':
                     # Menampilkan boxplot
@@ -141,16 +130,14 @@ elif selected == 'File Upload':
                     sns.boxplot(data['TX_AMOUNT'], ax=ax_box, color='lightcoral')
                     ax_box.set_xlabel('TX_AMOUNT')
                     st.pyplot(fig_box)
-                    st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
 
                     st.subheader('Boxplot Jeda Waktu Transaksi (Detik)')
                     fig_box_time, ax_box_time = plt.subplots()
                     sns.boxplot(data['TX_TIME_SECONDS'], ax=ax_box_time, color='lightcoral')
                     ax_box_time.set_xlabel('TX_TIME_SECONDS')
                     st.pyplot(fig_box_time)
-                    st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
 
-                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
+                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter
                 output = io.BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                     data.to_excel(writer, index=False, sheet_name='Sheet1')
@@ -172,14 +159,14 @@ elif selected == 'File Upload':
 elif selected == 'Pemodelan Random Forest':
     st.title('Pemodelan Random Forest')
 
-    st.write("Halaman ini digunakan untuk menghasilkan model dengan menggunakan algoritma ***Random Forest***")
+    st.write("Halaman ini digunakan untuk evaluasi model dengan menggunakan algoritma ***Random Forest***")
 
     st.write("**TX_AMOUNT**: Jumlah transaksi")
     st.write("**TX_TIME_SECONDS**: Jeda waktu transaksi dalam detik")
-    st.write("**TX_FRAUD**: Status transaksi yang mana 0 (sah) dan 1 (penipuan)")
+    st.write("**TX_FRAUD**: Status transaksi (0 untuk sah, 1 untuk penipuan)")
     st.write("**Note**: File harus berformat excel")
 
-    uploaded_file_rf = st.file_uploader('**Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan TX_FRAUD**', type=["xlsx"])
+    uploaded_file_rf = st.file_uploader('Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS, dan TX_FRAUD', type=["xlsx"])
 
     if uploaded_file_rf is not None:
         try:
@@ -198,36 +185,41 @@ elif selected == 'Pemodelan Random Forest':
                 st.write("Hasil Prediksi:")
                 st.write(data_rf)
 
-                # Menampilkan metrik evaluasi
-                st.subheader('Metrik Evaluasi Model')
+                # Dropdown untuk memilih informasi yang ingin ditampilkan
+                info_type = st.selectbox('Pilih informasi yang ingin ditampilkan:', ['Metrik Evaluasi Model', 'Confusion Matrix'])
 
-                accuracy_rf = accuracy_score(true_labels_rf, predictions_rf)
-                auc_rf = roc_auc_score(true_labels_rf, predictions_rf)
-                tn, fp, fn, tp = confusion_matrix(true_labels_rf, predictions_rf).ravel()
-                specificity_rf = tn / (tn + fp)
-                sensitivity_rf = tp / (tp + fn)
+                if info_type == 'Metrik Evaluasi Model':
+                    # Menampilkan metrik evaluasi
+                    st.subheader('Metrik Evaluasi Model')
 
-                st.write(f'**Akurasi**: {accuracy_rf:.2f}')
-                st.write(f'**Spesifisitas (Specificity)**: {specificity_rf:.2f}')
-                st.write(f'**Sensitivitas (Sensitivity)**: {sensitivity_rf:.2f}')
-                st.write(f'**AUC ROC**: {auc_rf:.2f}')
+                    accuracy_rf = accuracy_score(true_labels_rf, predictions_rf)
+                    auc_rf = roc_auc_score(true_labels_rf, predictions_rf)
+                    tn, fp, fn, tp = confusion_matrix(true_labels_rf, predictions_rf).ravel()
+                    specificity_rf = tn / (tn + fp)
+                    sensitivity_rf = tp / (tp + fn)
 
-                # Menampilkan Confusion Matrix
-                st.subheader('Confusion Matrix')
-                cm_rf = confusion_matrix(true_labels_rf, predictions_rf)
-                plt.figure(figsize=(6, 4))
-                sns.heatmap(cm_rf, annot=True, cmap='Reds', fmt='g')
-                plt.xlabel('Predicted')
-                plt.ylabel('Actual')
-                st.pyplot()
+                    st.write(f'**Akurasi**: {accuracy_rf:.2f}')
+                    st.write(f'**Spesifisitas (Specificity)**: {specificity_rf:.2f}')
+                    st.write(f'**Sensitivitas (Sensitivity)**: {sensitivity_rf:.2f}')
+                    st.write(f'**AUC ROC**: {auc_rf:.2f}')
 
-                # Menambahkan penjelasan di bawah Confusion Matrix
-                st.markdown(f"Transaksi yang sebenarnya sah dan diprediksi sebagai sah adalah sebesar {cm_rf[0, 0]} data")
-                st.markdown(f"Transaksi yang sebenarnya sah tetapi diprediksi sebagai penipuan adalah sebesar {cm_rf[0, 1]} data")
-                st.markdown(f"Transaksi yang sebenarnya penipuan dan diprediksi sebagai penipuan adalah sebesar {cm_rf[1, 1]} data")
-                st.markdown(f"Transaksi yang sebenarnya penipuan tetapi diprediksi sebagai sah adalah sebesar {cm_rf[1, 0]} data")
-                
-                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
+                elif info_type == 'Confusion Matrix':
+                    # Menampilkan Confusion Matrix
+                    st.subheader('Confusion Matrix')
+                    cm_rf = confusion_matrix(true_labels_rf, predictions_rf)
+                    plt.figure(figsize=(6, 4))
+                    sns.heatmap(cm_rf, annot=True, cmap='Reds', fmt='g')
+                    plt.xlabel('Predicted')
+                    plt.ylabel('Actual')
+                    st.pyplot()
+
+                    # Menambahkan penjelasan di bawah Confusion Matrix
+                    st.markdown(f"Transaksi yang sebenarnya sah dan diprediksi sebagai sah adalah sebesar {cm_rf[0, 0]} data")
+                    st.markdown(f"Transaksi yang sebenarnya sah tetapi diprediksi sebagai penipuan adalah sebesar {cm_rf[0, 1]} data")
+                    st.markdown(f"Transaksi yang sebenarnya penipuan dan diprediksi sebagai penipuan adalah sebesar {cm_rf[1, 1]} data")
+                    st.markdown(f"Transaksi yang sebenarnya penipuan tetapi diprediksi sebagai sah adalah sebesar {cm_rf[1, 0]} data")
+
+                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter
                 output_rf = io.BytesIO()
                 with pd.ExcelWriter(output_rf, engine='xlsxwriter') as writer:
                     data_rf.to_excel(writer, index=False, sheet_name='Sheet1')
@@ -248,12 +240,11 @@ elif selected == 'Pemodelan Random Forest':
 # Halaman informasi
 elif selected == 'Info':
     st.title('Informasi Dashboard')
-    
+
     st.write("""
-    Dashboard ini menggunakan algoritma ***Random Forest*** yang merupakan salah satu algoritma *machine learning* yang umum digunakan dalam permasalahan klasifikasi atau prediksi. Pada kasus ini digunakan untuk memprediksi mana transaksi yang termasuk ke dalam kelas penipuan dan sah. Prediksi didasarkan pada jumlah transaksi dan jeda waktu transaksi (detik). Ilustrasinya adalah sebagai berikut.
+    Dashboard ini menggunakan algoritma ***Random Forest*** yang merupakan salah satu algoritma *machine learning* yang umum digunakan dalam permasalahan klasifikasi atau prediksi. Pada kasus ini, digunakan untuk memprediksi transaksi yang sah atau terindikasi sebagai penipuan berdasarkan jumlah transaksi dan jeda waktu transaksi (detik). Ilustrasinya adalah sebagai berikut:
     """)
 
-    # Menampilkan gambar Random Forest dengan st.image dan mengatur penempatan dengan CSS
     st.markdown("""
     <style>
     .center {
