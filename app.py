@@ -17,7 +17,7 @@ st.set_page_config(
 )
 
 # Fungsi untuk memuat model terkompresi
-@st.cache_resource
+@st.cache
 def load_compressed_model(file_path):
     try:
         with lzma.open(file_path, 'rb') as file:
@@ -82,7 +82,7 @@ if selected == 'Manual Input':
 elif selected == 'File Upload':
     st.title('Transaction Prediction - File Upload')
 
-    uploaded_file = st.file_uploader("**Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS**", type=["xlsx"])
+    uploaded_file = st.file_uploader("Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS", type=["xlsx"])
 
     if uploaded_file is not None:
         try:
@@ -168,7 +168,7 @@ elif selected == 'Pemodelan Random Forest':
 
     st.write("Halaman ini digunakan untuk evaluasi model menggunakan data yang berbeda, tidak terkait dengan data yang diupload sebelumnya.")
 
-    uploaded_file_rf = st.file_uploader("**Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan FRAUD**", type=["xlsx"])
+    uploaded_file_rf = st.file_uploader("Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan FRAUD", type=["xlsx"])
 
     if uploaded_file_rf is not None:
         try:
