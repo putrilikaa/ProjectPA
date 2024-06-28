@@ -17,7 +17,7 @@ st.set_page_config(
 )
 
 # Fungsi untuk memuat model terkompresi
-@st.cache(allow_output_mutation=True)
+@st.cache_resource
 def load_compressed_model(file_path):
     try:
         with lzma.open(file_path, 'rb') as file:
@@ -107,33 +107,36 @@ elif selected == 'File Upload':
                 st.subheader('Karakteristik Jumlah Transaksi')
                 st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
 
-                # Menampilkan dashboard visualisasi
-                st.subheader('Dashboard Visualisasi')
-
-                fig, ax = plt.subplots(2, 2, figsize=(15, 10))
-
-                sns.histplot(data['TX_AMOUNT'], kde=True, ax=ax[0, 0])
-                ax[0, 0].set_title('Distribusi Jumlah Transaksi')
-                ax[0, 0].set_xlabel('TX_AMOUNT')
-                ax[0, 0].set_ylabel('Frekuensi')
-
-                sns.histplot(data['TX_TIME_SECONDS'], kde=True, ax=ax[0, 1])
-                ax[0, 1].set_title('Distribusi Jeda Waktu Transaksi (Detik)')
-                ax[0, 1].set_xlabel('TX_TIME_SECONDS')
-                ax[0, 1].set_ylabel('Frekuensi')
-
-                sns.boxplot(data['TX_AMOUNT'], ax=ax[1, 0])
-                ax[1, 0].set_title('Boxplot Jumlah Transaksi')
-                ax[1, 0].set_xlabel('TX_AMOUNT')
-
-                sns.boxplot(data['TX_TIME_SECONDS'], ax=ax[1, 1])
-                ax[1, 1].set_title('Boxplot Jeda Waktu Transaksi (Detik)')
-                ax[1, 1].set_xlabel('TX_TIME_SECONDS')
-
-                st.pyplot(fig)
-
-                # Menambahkan keterangan di bawah setiap plot
+                # Menampilkan histogram
+                st.subheader('Distribusi Jumlah Transaksi')
+                fig_hist, ax_hist = plt.subplots()
+                sns.histplot(data['TX_AMOUNT'], kde=True, ax=ax_hist)
+                ax_hist.set_xlabel('TX_AMOUNT')
+                ax_hist.set_ylabel('Frekuensi')
+                st.pyplot(fig_hist)
                 st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berdistribusi tidak normal.")
+
+                st.subheader('Distribusi Jeda Waktu Transaksi (Detik)')
+                fig_hist_time, ax_hist_time = plt.subplots()
+                sns.histplot(data['TX_TIME_SECONDS'], kde=True, ax=ax_hist_time)
+                ax_hist_time.set_xlabel('TX_TIME_SECONDS')
+                ax_hist_time.set_ylabel('Frekuensi')
+                st.pyplot(fig_hist_time)
+                st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berdistribusi tidak normal.")
+
+                # Menampilkan boxplot
+                st.subheader('Boxplot Jumlah Transaksi')
+                fig_box, ax_box = plt.subplots()
+                sns.boxplot(data['TX_AMOUNT'], ax=ax_box)
+                ax_box.set_xlabel('TX_AMOUNT')
+                st.pyplot(fig_box)
+                st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
+
+                st.subheader('Boxplot Jeda Waktu Transaksi (Detik)')
+                fig_box_time, ax_box_time = plt.subplots()
+                sns.boxplot(data['TX_TIME_SECONDS'], ax=ax_box_time)
+                ax_box_time.set_xlabel('TX_TIME_SECONDS')
+                st.pyplot(fig_box_time)
                 st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
 
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
@@ -208,9 +211,9 @@ elif selected == 'Pemodelan Random Forest':
                 output.seek(0)
 
                 st.download_button(
-                    label="Download hasil prediksi",
+                    label="Download hasil prediksi dan evaluasi",
                     data=output,
-                    file_name='hasil_prediksi.xlsx'
+                    file_name='hasil_prediksi_dan_evaluasi.xlsx'
                 )
 
             else:
