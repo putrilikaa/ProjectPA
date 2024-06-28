@@ -205,7 +205,7 @@ elif selected == 'Pemodelan Random Forest':
                 st.subheader('Confusion Matrix')
                 cm_rf = confusion_matrix(true_labels_rf, predictions_rf)
                 plt.figure(figsize=(6, 4))
-                sns.heatmap(cm_rf, annot=True, cmap='lightcoral', fmt='g')
+                sns.heatmap(cm_rf, annot=True, cmap='coolwarm', fmt='g')
                 plt.xlabel('Predicted')
                 plt.ylabel('Actual')
                 st.pyplot()
