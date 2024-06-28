@@ -37,15 +37,10 @@ if trans_model is None:
 
 # Sidebar untuk navigasi
 with st.sidebar:
-    selected = st.radio(
-        'Prediksi Transaksi',
-        options=[
-            'Manual Input',
-            'File Upload',
-            'Pemodelan Random Forest',
-            'Info'
-        ],
-        format_func=lambda x: 'Manual Input' if x == 'Manual Input' else ('File Upload' if x == 'File Upload' else ('Pemodelan Random Forest' if x == 'Pemodelan Random Forest' else 'Info'))
+    selected = st.selectbox(
+        'Navigasi',
+        ['Manual Input', 'File Upload', 'Pemodelan Random Forest', 'Info'],
+        index=2
     )
 
 # Halaman input manual
@@ -110,7 +105,7 @@ elif selected == 'File Upload':
                 st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
 
                 # Dropdown untuk memilih tipe plot
-                plot_type = st.selectbox('**Pilih jenis plot:**', ['Histogram', 'Boxplot'])
+                plot_type = st.selectbox('Pilih jenis plot:', ['Histogram', 'Boxplot'])
 
                 if plot_type == 'Histogram':
                     # Menampilkan histogram
@@ -191,7 +186,7 @@ elif selected == 'Pemodelan Random Forest':
                 st.write(data_rf)
 
                 # Dropdown untuk memilih informasi yang ingin ditampilkan
-                info_type = st.selectbox('**Pilih informasi yang ingin ditampilkan:**', ['Metrik Evaluasi Model', 'Confusion Matrix'])
+                info_type = st.selectbox('Pilih informasi yang ingin ditampilkan:', ['Metrik Evaluasi Model', 'Confusion Matrix'])
 
                 if info_type == 'Metrik Evaluasi Model':
                     # Menampilkan metrik evaluasi
@@ -219,10 +214,10 @@ elif selected == 'Pemodelan Random Forest':
                     st.pyplot()
 
                     # Menambahkan penjelasan di bawah Confusion Matrix
-                    st.markdown(f"Transaksi yang sebenarnya **sah dan diprediksi sebagai sah** adalah sebesar {cm_rf[0, 0]} data")
-                    st.markdown(f"Transaksi yang sebenarnya **sah tetapi diprediksi sebagai penipuan** adalah sebesar {cm_rf[0, 1]} data")
-                    st.markdown(f"Transaksi yang sebenarnya **penipuan dan diprediksi sebagai penipuan** adalah sebesar {cm_rf[1, 1]} data")
-                    st.markdown(f"Transaksi yang sebenarnya **penipuan tetapi diprediksi sebagai sah** adalah sebesar {cm_rf[1, 0]} data")
+                    st.markdown(f"Transaksi yang sebenarnya sah dan diprediksi sebagai sah adalah sebesar {cm_rf[0, 0]} data")
+                    st.markdown(f"Transaksi yang sebenarnya sah tetapi diprediksi sebagai penipuan adalah sebesar {cm_rf[0, 1]} data")
+                    st.markdown(f"Transaksi yang sebenarnya penipuan dan diprediksi sebagai penipuan adalah sebesar {cm_rf[1, 1]} data")
+                    st.markdown(f"Transaksi yang sebenarnya penipuan tetapi diprediksi sebagai sah adalah sebesar {cm_rf[1, 0]} data")
 
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter
                 output_rf = io.BytesIO()
