@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pickle
 import lzma
@@ -39,14 +38,14 @@ if trans_model is None:
 # Sidebar untuk navigasi
 with st.sidebar:
     selected = st.radio(
-        'Prediksi Transaksi',
+        'Navigasi',
         options=[
             'Manual Input',
             'File Upload',
             'Pemodelan Random Forest',
             'Info'
         ],
-        format_func=lambda x: 'Manual Input' if x == 'Manual Input' else ('File Upload' if x == 'File Upload' else ('Pemodelan Random Forest' if x == 'Pemodelan Random Forest' else 'Info'))
+        format_func=lambda x: 'Input Manual' if x == 'Manual Input' else ('Upload File' if x == 'File Upload' else ('Pemodelan Random Forest' if x == 'Pemodelan Random Forest' else 'Informasi'))
     )
 
 # Halaman input manual
@@ -120,7 +119,6 @@ elif selected == 'File Upload':
                     ax_hist.set_xlabel('TX_AMOUNT')
                     ax_hist.set_ylabel('Frekuensi')
                     st.pyplot(fig_hist)
-                    st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berbentuk tidak normal.")
 
                     st.subheader('Distribusi Jeda Waktu Transaksi (Detik)')
                     fig_hist_time, ax_hist_time = plt.subplots()
@@ -128,7 +126,6 @@ elif selected == 'File Upload':
                     ax_hist_time.set_xlabel('TX_TIME_SECONDS')
                     ax_hist_time.set_ylabel('Frekuensi')
                     st.pyplot(fig_hist_time)
-                    st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berbentuk tidak normal.")
 
                 elif plot_type == 'Boxplot':
                     # Menampilkan boxplot
@@ -137,14 +134,12 @@ elif selected == 'File Upload':
                     sns.boxplot(data['TX_AMOUNT'], ax=ax_box, color='lightcoral')
                     ax_box.set_xlabel('TX_AMOUNT')
                     st.pyplot(fig_box)
-                    st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
 
                     st.subheader('Boxplot Jeda Waktu Transaksi (Detik)')
                     fig_box_time, ax_box_time = plt.subplots()
                     sns.boxplot(data['TX_TIME_SECONDS'], ax=ax_box_time, color='lightcoral')
                     ax_box_time.set_xlabel('TX_TIME_SECONDS')
                     st.pyplot(fig_box_time)
-                    st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
 
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
                 output = io.BytesIO()
@@ -280,3 +275,4 @@ elif selected == 'Info':
     - **AUC ROC (Area Under the Receiver Operating Characteristic Curve)** mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
     - **ROC (Receiver Operating Characteristic Curve)** adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
     """)
+
