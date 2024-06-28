@@ -108,7 +108,7 @@ elif selected == 'File Upload':
                 st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
 
                 # Dropdown untuk memilih tipe plot
-                plot_type = st.selectbox('Pilih jenis plot:', ['Histogram', 'Boxplot'])
+                plot_type = st.selectbox('**Pilih jenis plot:**', ['Histogram', 'Boxplot'])
 
                 if plot_type == 'Histogram':
                     # Menampilkan histogram
@@ -196,12 +196,12 @@ elif selected == 'Pemodelan Random Forest':
                 specificity_rf = tn / (tn + fp)
                 sensitivity_rf = tp / (tp + fn)
 
-                st.write(f'Akurasi: {accuracy_rf:.2f}')
-                st.write(f'Spesifisitas: {specificity_rf:.2f}')
-                st.write(f'Sensitivitas: {sensitivity_rf:.2f}')
-                st.write(f'AUC: {auc_rf:.2f}')
+                st.write(f'**Akurasi**: {accuracy_rf:.2f}')
+                st.write(f'**Spesifisitas (Specificity)**: {specificity_rf:.2f}')
+                st.write(f'**Sensitivitas (Sensitivity)**: {sensitivity_rf:.2f}')
+                st.write(f'**AUC ROC**: {auc_rf:.2f}')
 
-                # Menampilkan confusion matrix
+                # Menampilkan Confusion Matrix
                 st.subheader('Confusion Matrix')
                 cm_rf = confusion_matrix(true_labels_rf, predictions_rf)
                 plt.figure(figsize=(6, 4))
@@ -254,9 +254,9 @@ elif selected == 'Info':
     st.write("""
     Terdapat beberapa pengukuran yang biasa digunakan untuk menentukan seberapa baik model, antara lain:
     
-    - *Spesifisitas (Specificity)* mengukur kemampuan model untuk dengan benar mengidentifikasi negatif sejati (true negatives) di antara semua kasus yang sebenarnya negatif.
-    - *Sensitivitas (Sensitivity)* mengukur kemampuan model untuk dengan benar mengidentifikasi positif sejati (true positives) di antara semua kasus yang sebenarnya positif.
-    - *Akurasi (Accuracy)* mengukur seberapa sering model membuat prediksi yang benar, baik untuk kasus positif maupun negatif.
-    - *AUC ROC (Area Under the Receiver Operating Characteristic Curve)* mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
-    - *ROC (Receiver Operating Characteristic Curve)* adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
+    - **Spesifisitas (Specificity)** mengukur kemampuan model untuk dengan benar mengidentifikasi negatif sejati (true negatives) di antara semua kasus yang sebenarnya negatif.
+    - **Sensitivitas (Sensitivity)** mengukur kemampuan model untuk dengan benar mengidentifikasi positif sejati (true positives) di antara semua kasus yang sebenarnya positif.
+    - **Akurasi (Accuracy)** mengukur seberapa sering model membuat prediksi yang benar, baik untuk kasus positif maupun negatif.
+    - **AUC ROC (Area Under the Receiver Operating Characteristic Curve)** mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
+    - **ROC (Receiver Operating Characteristic Curve)** adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
     """)
