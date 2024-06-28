@@ -43,11 +43,10 @@ with st.sidebar:
         [
             'Manual Input',
             'File Upload',
-            'Pemodelan Random Forest',
             'Info'
         ],
         menu_icon='money-fill',
-        icons=['pencil', 'upload', 'bar-chart', 'info-circle'],
+        icons=['pencil', 'upload', 'info-circle'],
         default_index=0
     )
 
@@ -166,75 +165,6 @@ elif selected == 'File Upload':
         except Exception as e:
             st.error(f"Error: {e}")
 
-# Halaman pemodelan Random Forest
-elif selected == 'Pemodelan Random Forest':
-    st.title('Pemodelan Random Forest')
-
-    st.write("""
-    Halaman ini digunakan untuk evaluasi model menggunakan pemodelan Random Forest. Data yang digunakan di sini tidak terkait dengan data yang diupload pada halaman sebelumnya.
-    """)
-
-    st.markdown("**Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan TX_FRAUD**")
-    st.markdown("**TX_AMOUNT:** Data jumlah transaksi")
-    st.markdown("**TX_TIME_SECONDS:** Data jeda waktu transaksi dalam detik")
-    st.markdown("**TX_FRAUD:** Status transaksi 1 (Penipuan) dan 0 (Sah)")
-    st.markdown("**NOTE:** Beri nama kolom sesuai keterangan di atas dan gunakan tanda titik (.) sebagai koma (,)")
-
-    uploaded_file_rf = st.file_uploader("", type=["xlsx"])
-
-    if uploaded_file_rf is not None:
-        try:
-            data_rf = pd.read_excel(uploaded_file_rf)
-            st.write("Data yang diupload untuk evaluasi model:")
-            st.write(data_rf)
-
-            if 'TX_AMOUNT' in data_rf.columns and 'TX_TIME_SECONDS' in data_rf.columns and 'TX_FRAUD' in data_rf.columns:
-                user_inputs_rf = data_rf[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
-                true_labels_rf = data_rf['TX_FRAUD'].astype(int)
-                predictions_rf = trans_model.predict(user_inputs_rf)
-
-                data_rf['Prediction'] = predictions_rf
-                data_rf['Prediction'] = data_rf['Prediction'].apply(lambda x: 'Transaksi tidak aman (indikasi penipuan)' if x == 1 else 'Transaksi aman')
-
-                st.write("Hasil Prediksi:")
-                st.write(data_rf)
-
-                # Menampilkan metrik evaluasi
-                st.subheader('Metrik Evaluasi Model')
-
-                accuracy_rf = accuracy_score(true_labels_rf, predictions_rf)
-                st.write(f'**Akurasi**: {accuracy_rf:.2f}')
-
-                auc_rf = roc_auc_score(true_labels_rf, predictions_rf)
-                st.write(f'**AUC ROC**: {auc_rf:.2f}')
-
-                # Menampilkan Confusion Matrix
-                st.subheader('Confusion Matrix')
-                cm_rf = confusion_matrix(true_labels_rf, predictions_rf)
-                plt.figure(figsize=(6, 4))
-                sns.heatmap(cm_rf, annot=True, cmap='Reds', fmt='g')
-                plt.xlabel('Predicted')
-                plt.ylabel('Actual')
-                st.pyplot()
-                
-                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
-                output_rf = io.BytesIO()
-                with pd.ExcelWriter(output_rf, engine='xlsxwriter') as writer:
-                    data_rf.to_excel(writer, index=False, sheet_name='Sheet1')
-                
-                output_rf.seek(0)
-
-                st.download_button(
-                    label="Download hasil prediksi dan evaluasi",
-                    data=output_rf,
-                    file_name='hasil_prediksi_dan_evaluasi.xlsx'
-                )
-
-            else:
-                st.error('File tidak memiliki kolom yang diperlukan: TX_AMOUNT, TX_TIME_SECONDS, TX_FRAUD')
-        except Exception as e:
-            st.error(f"Error: {e}")
-
 # Halaman informasi
 elif selected == 'Info':
     st.title('Informasi Dashboard')
@@ -267,3 +197,4 @@ elif selected == 'Info':
     - **AUC ROC (Area Under the Receiver Operating Characteristic Curve)** mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
     - **ROC (Receiver Operating Characteristic Curve)** adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
     """)
+
