@@ -7,7 +7,7 @@ import io
 import matplotlib.pyplot as plt
 import seaborn as sns
 import xlsxwriter
-from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score, roc_curve, classification_report
+from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
 
 # Konfigurasi halaman Streamlit
 st.set_page_config(
@@ -131,6 +131,10 @@ elif selected == 'File Upload':
                 ax[1, 1].set_xlabel('TX_TIME_SECONDS')
 
                 st.pyplot(fig)
+
+                # Menambahkan keterangan di bawah setiap plot
+                st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berdistribusi tidak normal.")
+                st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
 
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
                 output = io.BytesIO()
