@@ -6,7 +6,6 @@ import pandas as pd
 import io
 import matplotlib.pyplot as plt
 import seaborn as sns
-import xlsxwriter
 from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
 
 # Konfigurasi halaman Streamlit
@@ -65,14 +64,14 @@ if selected == 'Manual Input':
 
     transaction_prediction = ''
 
-    if st.button('Transaction Prediction Result'):
+    if st.button('Hasil Prediksi'):
         try:
             user_input = [float(TX_AMOUNT), float(TX_TIME_SECONDS)]
             transaction_diagnosis = trans_model.predict([user_input])
             if transaction_diagnosis[0] == 1:
-                transaction_prediction = 'Transaksi anda tidak aman karena terjadi indikasi penipuan'
+                transaction_prediction = 'Transaksi yang anda lakukan tidak aman karena terjadi indikasi penipuan'
             else:
-                transaction_prediction = 'Transaksi anda aman karena dilakukan secara sah'
+                transaction_prediction = 'Transaksi yang anda lakukan aman karena dilakukan secara sah'
         except ValueError:
             transaction_prediction = 'Harap masukkan nilai numerik yang valid untuk semua input'
         
@@ -171,7 +170,9 @@ elif selected == 'File Upload':
 elif selected == 'Pemodelan Random Forest':
     st.title('Pemodelan Random Forest')
 
-    st.write("Halaman ini digunakan untuk evaluasi model menggunakan data yang berbeda, tidak terkait dengan data yang diupload sebelumnya.")
+    st.write("""
+    Halaman ini digunakan untuk evaluasi model menggunakan pemodelan Random Forest. Data yang digunakan di sini tidak terkait dengan data yang diupload pada halaman sebelumnya.
+    """)
 
     st.markdown("**Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan TX_FRAUD**")
     st.markdown("**TX_AMOUNT:** Data jumlah transaksi")
