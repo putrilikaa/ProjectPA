@@ -48,20 +48,26 @@ with st.sidebar:
         format_func=lambda x: 'Manual Input' if x == 'Manual Input' else ('File Upload' if x == 'File Upload' else ('Pemodelan Random Forest' if x == 'Pemodelan Random Forest' else 'Info'))
     )
 
-    # Mengubah warna sidebar menjadi merah kembali
-    st.markdown(
-        """
+    # Mengubah warna sidebar dan font
+    st.markdown("""
         <style>
         [data-testid="stSidebar"][aria-expanded="true"] > div:first-child {
-            background-color: #ff0000;
+            background-color: #f0f0f0;
         }
         [data-testid="stSidebar"][aria-expanded="false"] > div:first-child {
-            background-color: #ff0000;
+            background-color: #f0f0f0;
+        }
+        .css-1d391kg {
+            color: #000000;
+        }
+        .css-17z3k9b {
+            color: #333333;
+        }
+        .css-145kmo2 {
+            color: #333333;
         }
         </style>
-        """,
-        unsafe_allow_html=True
-    )
+        """, unsafe_allow_html=True)
 
 # Halaman input manual
 if selected == 'Manual Input':
