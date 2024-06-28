@@ -78,7 +78,7 @@ if selected == 'Manual Input':
         
         st.success(transaction_prediction)
 
-# Halaman upload file
+# Halaman upload file (untuk transaksi biasa)
 elif selected == 'File Upload':
     st.title('Transaction Prediction - File Upload')
 
@@ -87,7 +87,7 @@ elif selected == 'File Upload':
     if uploaded_file is not None:
         try:
             data = pd.read_excel(uploaded_file)
-            st.write("Data yang diupload:")
+            st.write("Data yang diupload untuk prediksi transaksi biasa:")
             st.write(data)
 
             if 'TX_AMOUNT' in data.columns and 'TX_TIME_SECONDS' in data.columns:
@@ -114,7 +114,7 @@ elif selected == 'File Upload':
                 ax_hist.set_xlabel('TX_AMOUNT')
                 ax_hist.set_ylabel('Frekuensi')
                 st.pyplot(fig_hist)
-                st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berdistribusi tidak normal.")
+                st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berbentuk tidak normal.")
 
                 st.subheader('Distribusi Jeda Waktu Transaksi (Detik)')
                 fig_hist_time, ax_hist_time = plt.subplots()
@@ -122,7 +122,7 @@ elif selected == 'File Upload':
                 ax_hist_time.set_xlabel('TX_TIME_SECONDS')
                 ax_hist_time.set_ylabel('Frekuensi')
                 st.pyplot(fig_hist_time)
-                st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berdistribusi tidak normal.")
+                st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berbentuk tidak normal.")
 
                 # Menampilkan boxplot
                 st.subheader('Boxplot Jumlah Transaksi')
@@ -161,58 +161,60 @@ elif selected == 'File Upload':
 elif selected == 'Pemodelan Random Forest':
     st.title('Pemodelan Random Forest')
 
-    uploaded_file = st.file_uploader("Upload file Excel dengan data transaksi", type=["xlsx"])
+    st.write("Halaman ini digunakan untuk evaluasi model menggunakan data yang berbeda, tidak terkait dengan data yang diupload sebelumnya.")
 
-    if uploaded_file is not None:
+    uploaded_file_rf = st.file_uploader("Upload file Excel dengan data untuk evaluasi model", type=["xlsx"])
+
+    if uploaded_file_rf is not None:
         try:
-            data = pd.read_excel(uploaded_file)
-            st.write("Data yang diupload:")
-            st.write(data)
+            data_rf = pd.read_excel(uploaded_file_rf)
+            st.write("Data yang diupload untuk evaluasi model:")
+            st.write(data_rf)
 
-            if 'TX_AMOUNT' in data.columns and 'TX_TIME_SECONDS' in data.columns and 'FRAUD' in data.columns:
-                user_inputs = data[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
-                true_labels = data['FRAUD'].astype(int)
-                predictions = trans_model.predict(user_inputs)
+            if 'TX_AMOUNT' in data_rf.columns and 'TX_TIME_SECONDS' in data_rf.columns and 'FRAUD' in data_rf.columns:
+                user_inputs_rf = data_rf[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
+                true_labels_rf = data_rf['FRAUD'].astype(int)
+                predictions_rf = trans_model.predict(user_inputs_rf)
 
-                data['Prediction'] = predictions
-                data['Prediction'] = data['Prediction'].apply(lambda x: 'Transaksi tidak aman (indikasi penipuan)' if x == 1 else 'Transaksi aman')
+                data_rf['Prediction'] = predictions_rf
+                data_rf['Prediction'] = data_rf['Prediction'].apply(lambda x: 'Transaksi tidak aman (indikasi penipuan)' if x == 1 else 'Transaksi aman')
 
                 st.write("Hasil Prediksi:")
-                st.write(data)
+                st.write(data_rf)
 
                 # Menampilkan metrik evaluasi
                 st.subheader('Metrik Evaluasi Model')
 
-                accuracy = accuracy_score(true_labels, predictions)
-                auc = roc_auc_score(true_labels, predictions)
-                cm = confusion_matrix(true_labels, predictions)
-                sensitivity = cm[1,1] / (cm[1,1] + cm[1,0])
-                specificity = cm[0,0] / (cm[0,0] + cm[0,1])
+                accuracy_rf = accuracy_score(true_labels_rf, predictions_rf)
+                auc_rf = roc_auc_score(true_labels_rf, predictions_rf)
+                tn, fp, fn, tp = confusion_matrix(true_labels_rf, predictions_rf).ravel()
+                specificity_rf = tn / (tn + fp)
+                sensitivity_rf = tp / (tp + fn)
 
-                st.write(f"**Akurasi**: {accuracy:.2f}")
-                st.write(f"**Sensitivitas**: {sensitivity:.2f}")
-                st.write(f"**Spesifisitas**: {specificity:.2f}")
-                st.write(f"**AUC**: {auc:.2f}")
+                st.write(f'Akurasi: {accuracy_rf:.2f}')
+                st.write(f'Spesifisitas: {specificity_rf:.2f}')
+                st.write(f'Sensitivitas: {sensitivity_rf:.2f}')
+                st.write(f'AUC: {auc_rf:.2f}')
 
-                # Menampilkan confusion matrix sebagai grafik berwarna
-                st.write("**Confusion Matrix**:")
-                fig, ax = plt.subplots()
-                sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax)
-                ax.set_xlabel('Predicted')
-                ax.set_ylabel('Actual')
-                ax.set_title('Confusion Matrix')
-                st.pyplot(fig)
-
-                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
-                output = io.BytesIO()
-                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                    data.to_excel(writer, index=False, sheet_name='Sheet1')
+                # Menampilkan confusion matrix
+                st.subheader('Confusion Matrix')
+                cm_rf = confusion_matrix(true_labels_rf, predictions_rf)
+                plt.figure(figsize=(6, 4))
+                sns.heatmap(cm_rf, annot=True, cmap='Blues', fmt='g')
+                plt.xlabel('Predicted')
+                plt.ylabel('Actual')
+                st.pyplot()
                 
-                output.seek(0)
+                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
+                output_rf = io.BytesIO()
+                with pd.ExcelWriter(output_rf, engine='xlsxwriter') as writer:
+                    data_rf.to_excel(writer, index=False, sheet_name='Sheet1')
+                
+                output_rf.seek(0)
 
                 st.download_button(
                     label="Download hasil prediksi dan evaluasi",
-                    data=output,
+                    data=output_rf,
                     file_name='hasil_prediksi_dan_evaluasi.xlsx'
                 )
 
@@ -253,3 +255,4 @@ elif selected == 'Info':
     - *AUC ROC (Area Under the Receiver Operating Characteristic Curve)* mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
     - *ROC (Receiver Operating Characteristic Curve)* adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
     """)
+
