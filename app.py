@@ -190,10 +190,50 @@ elif selected == 'Pemodelan Random Forest':
                 predictions_rf = trans_model.predict(user_inputs_rf)
 
                 data_rf['Prediction'] = predictions_rf
-                data_rf['Prediction'] = data_rf['Prediction'].apply(lambda x: 'Transaksi tidak aman (indikasi penipuan)' if x == 1 else 'Transaksi aman')
+                data_rf['Prediction'] = data_rf['Prediction'].apply(lambda x: 'Penipuan' if x == 1 else 'Sah')
 
                 st.write("Hasil Prediksi:")
                 st.write(data_rf)
+
+                # Menampilkan tabel statistik deskriptif
+                st.subheader('Karakteristik Jeda Waktu Detik')
+                st.write(data_rf['TX_TIME_SECONDS'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
+
+                st.subheader('Karakteristik Jumlah Transaksi')
+                st.write(data_rf['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
+
+                # Dropdown untuk memilih tipe plot
+                plot_type_rf = st.selectbox('**Pilih jenis plot:**', ['Histogram', 'Boxplot'])
+
+                if plot_type_rf == 'Histogram':
+                    # Menampilkan histogram
+                    st.subheader('Distribusi Jumlah Transaksi')
+                    fig_hist_rf, ax_hist_rf = plt.subplots()
+                    sns.histplot(data_rf['TX_AMOUNT'], kde=True, ax=ax_hist_rf, color='lightblue')
+                    ax_hist_rf.set_xlabel('TX_AMOUNT')
+                    ax_hist_rf.set_ylabel('Frekuensi')
+                    st.pyplot(fig_hist_rf)
+
+                    st.subheader('Distribusi Jeda Waktu Transaksi (Detik)')
+                    fig_hist_time_rf, ax_hist_time_rf = plt.subplots()
+                    sns.histplot(data_rf['TX_TIME_SECONDS'], kde=True, ax=ax_hist_time_rf, color='lightblue')
+                    ax_hist_time_rf.set_xlabel('TX_TIME_SECONDS')
+                    ax_hist_time_rf.set_ylabel('Frekuensi')
+                    st.pyplot(fig_hist_time_rf)
+
+                elif plot_type_rf == 'Boxplot':
+                    # Menampilkan boxplot
+                    st.subheader('Boxplot Jumlah Transaksi')
+                    fig_box_rf, ax_box_rf = plt.subplots()
+                    sns.boxplot(data_rf['TX_AMOUNT'], ax=ax_box_rf, color='lightblue')
+                    ax_box_rf.set_xlabel('TX_AMOUNT')
+                    st.pyplot(fig_box_rf)
+
+                    st.subheader('Boxplot Jeda Waktu Transaksi (Detik)')
+                    fig_box_time_rf, ax_box_time_rf = plt.subplots()
+                    sns.boxplot(data_rf['TX_TIME_SECONDS'], ax=ax_box_time_rf, color='lightblue')
+                    ax_box_time_rf.set_xlabel('TX_TIME_SECONDS')
+                    st.pyplot(fig_box_time_rf)
 
                 # Menampilkan metrik evaluasi
                 st.subheader('Metrik Evaluasi Model')
