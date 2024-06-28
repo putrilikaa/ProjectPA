@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_option_menu import option_menu
 import pickle
 import lzma
 import pandas as pd
@@ -37,20 +38,22 @@ if trans_model is None:
 
 # Sidebar untuk navigasi
 with st.sidebar:
-    selected = st.radio(
+    selected = option_menu(
         'Prediksi Transaksi',
-        options=[
+        [
             'Manual Input',
             'File Upload',
             'Pemodelan Random Forest',
             'Info'
         ],
-        format_func=lambda x: 'Manual Input' if x == 'Manual Input' else ('File Upload' if x == 'File Upload' else ('Pemodelan Random Forest' if x == 'Pemodelan Random Forest' else 'Info'))
+        menu_icon='money-fill',
+        icons=['pencil', 'upload', 'bar-chart', 'info-circle'],
+        default_index=0
     )
 
 # Halaman input manual
 if selected == 'Manual Input':
-    st.title('Prediksi Transaksi - Input Manual')
+    st.title('Transaction Prediction - Manual Input')
 
     col1, col2 = st.columns(2)
 
@@ -76,7 +79,7 @@ if selected == 'Manual Input':
 
 # Halaman upload file (untuk transaksi biasa)
 elif selected == 'File Upload':
-    st.title('Prediksi Transaksi - Upload File Excel')
+    st.title('Transaction Prediction - File Upload')
 
     st.markdown("**Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS**")
     st.markdown("**TX_AMOUNT:** Data jumlah transaksi")
@@ -208,27 +211,12 @@ elif selected == 'Pemodelan Random Forest':
                 # Menampilkan Confusion Matrix
                 st.subheader('Confusion Matrix')
                 cm_rf = confusion_matrix(true_labels_rf, predictions_rf)
-                
-                # Tampilkan keterangan di bawah Confusion Matrix
-                st.markdown("""
-                ### Penjelasan Confusion Matrix:
-                - **True Positive (TP)**: Transaksi yang sebenarnya penipuan dan diprediksi sebagai penipuan.
-                - **True Negative (TN)**: Transaksi yang sebenarnya sah dan diprediksi sebagai sah.
-                - **False Positive (FP)**: Transaksi yang sebenarnya sah tetapi diprediksi sebagai penipuan.
-                - **False Negative (FN)**: Transaksi yang sebenarnya penipuan tetapi diprediksi sebagai sah.
-                """)
-
-                st.markdown(f"Transaksi yang sebenarnya sah dan diprediksi sebagai sah adalah sebesar {cm_rf[0, 0]} data")
-                st.markdown(f"Transaksi yang sebenarnya sah tetapi diprediksi sebagai penipuan adalah sebesar {cm_rf[0, 1]} data")
-                st.markdown(f"Transaksi yang sebenarnya penipuan dan diprediksi sebagai penipuan adalah sebesar {cm_rf[1, 1]} data")
-                st.markdown(f"Transaksi yang sebenarnya penipuan tetapi diprediksi sebagai sah adalah sebesar {cm_rf[1, 0]} data")
-
                 plt.figure(figsize=(6, 4))
-                sns.heatmap(cm_rf, annot=True, cmap='Reds', fmt='g')  # fmt='g' untuk menampilkan angka tanpa desimal jika angka integer
-                plt.xlabel('Prediksi')
-                plt.ylabel('Aktual')
+                sns.heatmap(cm_rf, annot=True, cmap='Reds', fmt='g')
+                plt.xlabel('Predicted')
+                plt.ylabel('Actual')
                 st.pyplot()
-
+                
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
                 output_rf = io.BytesIO()
                 with pd.ExcelWriter(output_rf, engine='xlsxwriter') as writer:
