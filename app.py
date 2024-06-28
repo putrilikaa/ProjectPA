@@ -6,7 +6,8 @@ import pandas as pd
 import io
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score, classification_report
+import xlsxwriter
+from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
 
 # Konfigurasi halaman Streamlit
 st.set_page_config(
@@ -64,14 +65,14 @@ if selected == 'Manual Input':
 
     transaction_prediction = ''
 
-    if st.button('Hasil Prediksi'):
+    if st.button('Transaction Prediction Result'):
         try:
             user_input = [float(TX_AMOUNT), float(TX_TIME_SECONDS)]
             transaction_diagnosis = trans_model.predict([user_input])
             if transaction_diagnosis[0] == 1:
-                transaction_prediction = 'Transaksi yang anda lakukan tidak aman karena terjadi indikasi penipuan'
+                transaction_prediction = 'Transaksi anda tidak aman karena terjadi indikasi penipuan'
             else:
-                transaction_prediction = 'Transaksi yang anda lakukan aman karena dilakukan secara sah'
+                transaction_prediction = 'Transaksi anda aman karena dilakukan secara sah'
         except ValueError:
             transaction_prediction = 'Harap masukkan nilai numerik yang valid untuk semua input'
         
@@ -81,12 +82,7 @@ if selected == 'Manual Input':
 elif selected == 'File Upload':
     st.title('Transaction Prediction - File Upload')
 
-    st.markdown("**Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS**")
-    st.markdown("**TX_AMOUNT:** Data jumlah transaksi")
-    st.markdown("**TX_TIME_SECONDS:** Data jeda waktu transaksi dalam detik")
-    st.markdown("**NOTE:** Beri nama kolom sesuai keterangan di atas dan gunakan tanda titik (.) sebagai koma (,)")
-
-    uploaded_file = st.file_uploader("", type=["xlsx"])
+    uploaded_file = st.file_uploader("**Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS**", type=["xlsx"])
 
     if uploaded_file is not None:
         try:
@@ -170,17 +166,9 @@ elif selected == 'File Upload':
 elif selected == 'Pemodelan Random Forest':
     st.title('Pemodelan Random Forest')
 
-    st.write("""
-    Halaman ini digunakan untuk evaluasi model menggunakan pemodelan Random Forest. Data yang digunakan di sini adalah untuk evaluasi model dan tidak terkait dengan data yang diupload pada halaman sebelumnya.
-    """)
+    st.write("Halaman ini digunakan untuk evaluasi model menggunakan data yang berbeda, tidak terkait dengan data yang diupload sebelumnya.")
 
-    st.markdown("**Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan TX_FRAUD**")
-    st.markdown("**TX_AMOUNT:** Data jumlah transaksi")
-    st.markdown("**TX_TIME_SECONDS:** Data jeda waktu transaksi dalam detik")
-    st.markdown("**TX_FRAUD:** Status transaksi 1 (Penipuan) dan 0 (Sah)")
-    st.markdown("**NOTE:** Beri nama kolom sesuai keterangan di atas dan gunakan tanda titik (.) sebagai koma (,)")
-
-    uploaded_file_rf = st.file_uploader("", type=["xlsx"])
+    uploaded_file_rf = st.file_uploader("**Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan FRAUD**", type=["xlsx"])
 
     if uploaded_file_rf is not None:
         try:
@@ -188,33 +176,55 @@ elif selected == 'Pemodelan Random Forest':
             st.write("Data yang diupload untuk evaluasi model:")
             st.write(data_rf)
 
-            if 'TX_AMOUNT' in data_rf.columns and 'TX_TIME_SECONDS' in data_rf.columns and 'TX_FRAUD' in data_rf.columns:
-                X_rf = data_rf[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
-                y_rf = data_rf['TX_FRAUD'].astype(int)
+            if 'TX_AMOUNT' in data_rf.columns and 'TX_TIME_SECONDS' in data_rf.columns and 'FRAUD' in data_rf.columns:
+                user_inputs_rf = data_rf[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
+                true_labels_rf = data_rf['FRAUD'].astype(int)
+                predictions_rf = trans_model.predict(user_inputs_rf)
 
-                predictions_rf = trans_model.predict(X_rf)
+                data_rf['Prediction'] = predictions_rf
+                data_rf['Prediction'] = data_rf['Prediction'].apply(lambda x: 'Transaksi tidak aman (indikasi penipuan)' if x == 1 else 'Transaksi aman')
 
-                st.subheader('Hasil Evaluasi Model')
-                st.write(f"Accuracy Score: {accuracy_score(y_rf, predictions_rf):.2f}")
-                st.write(f"Confusion Matrix:\n{confusion_matrix(y_rf, predictions_rf)}")
-                st.write(f"Classification Report:\n{classification_report(y_rf, predictions_rf)}")
+                st.write("Hasil Prediksi:")
+                st.write(data_rf)
 
-                st.subheader('ROC Curve and AUC')
-                roc_auc = roc_auc_score(y_rf, predictions_rf)
-                fpr, tpr, thresholds = roc_curve(y_rf, predictions_rf)
-                plt.figure()
-                plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.2f})')
-                plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-                plt.xlim([0.0, 1.0])
-                plt.ylim([0.0, 1.05])
-                plt.xlabel('False Positive Rate')
-                plt.ylabel('True Positive Rate')
-                plt.title('Receiver Operating Characteristic (ROC)')
-                plt.legend(loc="lower right")
-                st.pyplot(plt)
+                # Menampilkan metrik evaluasi
+                st.subheader('Metrik Evaluasi Model')
+
+                accuracy_rf = accuracy_score(true_labels_rf, predictions_rf)
+                auc_rf = roc_auc_score(true_labels_rf, predictions_rf)
+                tn, fp, fn, tp = confusion_matrix(true_labels_rf, predictions_rf).ravel()
+                specificity_rf = tn / (tn + fp)
+                sensitivity_rf = tp / (tp + fn)
+
+                st.write(f'**Akurasi**: {accuracy_rf:.2f}')
+                st.write(f'**Spesifisitas (Specificity)**: {specificity_rf:.2f}')
+                st.write(f'**Sensitivitas (Sensitivity)**: {sensitivity_rf:.2f}')
+                st.write(f'**AUC ROC**: {auc_rf:.2f}')
+
+                # Menampilkan Confusion Matrix
+                st.subheader('Confusion Matrix')
+                cm_rf = confusion_matrix(true_labels_rf, predictions_rf)
+                plt.figure(figsize=(6, 4))
+                sns.heatmap(cm_rf, annot=True, cmap='Reds', fmt='g')
+                plt.xlabel('Predicted')
+                plt.ylabel('Actual')
+                st.pyplot()
+                
+                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
+                output_rf = io.BytesIO()
+                with pd.ExcelWriter(output_rf, engine='xlsxwriter') as writer:
+                    data_rf.to_excel(writer, index=False, sheet_name='Sheet1')
+                
+                output_rf.seek(0)
+
+                st.download_button(
+                    label="Download hasil prediksi dan evaluasi",
+                    data=output_rf,
+                    file_name='hasil_prediksi_dan_evaluasi.xlsx'
+                )
 
             else:
-                st.error('File tidak memiliki kolom yang diperlukan: TX_AMOUNT, TX_TIME_SECONDS, TX_FRAUD')
+                st.error('File tidak memiliki kolom yang diperlukan: TX_AMOUNT, TX_TIME_SECONDS, FRAUD')
         except Exception as e:
             st.error(f"Error: {e}")
 
@@ -223,7 +233,7 @@ elif selected == 'Info':
     st.title('Informasi Dashboard')
     
     st.write("""
-    Dashboard ini menggunakan pemodelan dengan algoritma ***Random Forest*** yang merupakan salah satu algoritma machine learning yang umum digunakan dalam permasalahan klasifikasi atau prediksi. Pada kasus ini digunakan untuk memprediksi mana transaksi yang termasuk ke dalam kelas penipuan dan sah. Prediksi didasarkan pada jumlah transaksi dan jeda waktu transaksi (detik).
+    *Random Forest* adalah salah satu algoritma machine learning yang umum digunakan dalam permasalahan klasifikasi atau prediksi. Pada kasus ini digunakan untuk memprediksi mana transaksi yang termasuk ke dalam kelas penipuan dan sah. Prediksi didasarkan pada jumlah transaksi dan jeda waktu transaksi (detik).
     """)
 
     # Menampilkan gambar Random Forest dengan st.image dan mengatur penempatan dengan CSS
