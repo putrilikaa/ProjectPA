@@ -53,7 +53,7 @@ with st.sidebar:
 
 # Halaman input manual
 if selected == 'Manual Input':
-    st.title('Transaction Prediction - Manual Input')
+    st.title('Prediksi Transaksi - Input Manual')
 
     col1, col2 = st.columns(2)
 
@@ -79,7 +79,7 @@ if selected == 'Manual Input':
 
 # Halaman upload file (untuk transaksi biasa)
 elif selected == 'File Upload':
-    st.title('Transaction Prediction - File Upload')
+    st.title('Prediksi Transaksi - Upload File Excel')
 
     st.markdown("**Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS**")
     st.markdown("**TX_AMOUNT:** Data jumlah transaksi")
