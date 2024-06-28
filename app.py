@@ -83,9 +83,9 @@ elif selected == 'File Upload':
     st.title('Transaction Prediction - File Upload')
 
     st.markdown("**Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS**")
-    st.markdown("**TX_AMOUNT: Data jumlah transaksi**")
-    st.markdown("**TX_TIME_SECONDS: Data jeda waktu transaksi dalam detik**")
-    st.markdown("**NOTE: Beri nama kolom sesuai keterangan di atas dan gunakan tanda titik (.) sebagai koma (,)**")
+    st.markdown("**TX_AMOUNT:** Data jumlah transaksi")
+    st.markdown("**TX_TIME_SECONDS:** Data jeda waktu transaksi dalam detik")
+    st.markdown("**NOTE:** Beri nama kolom sesuai keterangan di atas dan gunakan tanda titik (.) sebagai koma (,)")
 
     uploaded_file = st.file_uploader("", type=["xlsx"])
 
@@ -174,10 +174,10 @@ elif selected == 'Pemodelan Random Forest':
     st.write("Halaman ini digunakan untuk evaluasi model menggunakan data yang berbeda, tidak terkait dengan data yang diupload sebelumnya.")
 
     st.markdown("**Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan TX_FRAUD**")
-    st.markdown("**TX_AMOUNT: Data jumlah transaksi**")
-    st.markdown("**TX_TIME_SECONDS: Data jeda waktu transaksi dalam detik**")
-    st.markdown("**TX_FRAUD: Status transaksi 1 (Penipuan) dan 0 (Sah)**")
-    st.markdown("**NOTE: Beri nama kolom sesuai keterangan di atas dan gunakan tanda titik (.) sebagai koma (,)**")
+    st.markdown("**TX_AMOUNT:** Data jumlah transaksi")
+    st.markdown("**TX_TIME_SECONDS:** Data jeda waktu transaksi dalam detik")
+    st.markdown("**TX_FRAUD:** Status transaksi 1 (Penipuan) dan 0 (Sah)")
+    st.markdown("**NOTE:** Beri nama kolom sesuai keterangan di atas dan gunakan tanda titik (.) sebagai koma (,)")
 
     uploaded_file_rf = st.file_uploader("", type=["xlsx"])
 
