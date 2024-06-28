@@ -185,9 +185,6 @@ elif selected == 'Pemodelan Random Forest':
             st.write(data_rf)
 
             if 'TX_AMOUNT' in data_rf.columns and 'TX_TIME_SECONDS' in data_rf.columns and 'TX_FRAUD' in data_rf.columns:
-                if 'Prediction' in data_rf.columns:
-                    data_rf.drop(columns=['Prediction'], inplace=True)
-
                 user_inputs_rf = data_rf[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
                 true_labels_rf = data_rf['TX_FRAUD'].astype(int)
                 predictions_rf = trans_model.predict(user_inputs_rf)
@@ -281,4 +278,3 @@ elif selected == 'Info':
     - **AUC ROC (Area Under the Receiver Operating Characteristic Curve)** mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
     - **ROC (Receiver Operating Characteristic Curve)** adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
     """)
-
