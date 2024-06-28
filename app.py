@@ -14,6 +14,31 @@ st.set_page_config(
     page_icon="💱"
 )
 
+# Custom CSS to style the sidebar
+st.markdown("""
+    <style>
+    .css-1d391kg {
+        background-color: #F8F9FA !important;
+    }
+    .css-1d391kg .css-1d391kg {
+        color: black !important;
+    }
+    .css-10trblm {
+        background-color: #ffffff !important;
+    }
+    .css-1d391kg .st-af {
+        color: #ffffff;
+        background-color: #FF4B4B !important;
+    }
+    .css-1d391kg .st-ae {
+        color: black !important;
+    }
+    .css-1d391kg .st-ae:hover {
+        color: black !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # Fungsi untuk memuat model terkompresi
 @st.cache_resource
 def load_compressed_model(file_path):
@@ -38,130 +63,27 @@ if trans_model is None:
 # Sidebar untuk navigasi
 with st.sidebar:
     selected = st.radio(
-        'Prediksi Transaksi',
+        'Main Menu',
         options=[
-            'Manual Input',
-            'File Upload',
+            'Dashboard',
+            'Data Visualization',
             'Pemodelan Random Forest',
             'Info'
         ],
-        format_func=lambda x: 'Manual Input' if x == 'Manual Input' else ('File Upload' if x == 'File Upload' else ('Pemodelan Random Forest' if x == 'Pemodelan Random Forest' else 'Info'))
+        format_func=lambda x: 'Dashboard' if x == 'Dashboard' else ('Data Visualization' if x == 'Data Visualization' else ('Pemodelan Random Forest' if x == 'Pemodelan Random Forest' else 'Info'))
     )
 
-# Halaman input manual
-if selected == 'Manual Input':
-    st.title('Prediksi Transaksi - Input Manual')
+# Halaman Dashboard
+if selected == 'Dashboard':
+    st.title('Dashboard')
 
-    col1, col2 = st.columns(2)
+    # Your dashboard content here
 
-    with col1:
-        TX_AMOUNT = st.text_input('Jumlah Transaksi', '')  # Mengganti label dengan Jumlah Transaksi
-    with col2:
-        TX_TIME_SECONDS = st.text_input('Jeda Waktu Transaksi (Detik)', '')  # Mengganti label dengan Jeda Waktu Transaksi (Detik)
+# Halaman Data Visualization
+elif selected == 'Data Visualization':
+    st.title('Data Visualization')
 
-    transaction_prediction = ''
-
-    if st.button('Hasil Prediksi'):
-        try:
-            user_input = [float(TX_AMOUNT), float(TX_TIME_SECONDS)]
-            transaction_diagnosis = trans_model.predict([user_input])
-            if transaction_diagnosis[0] == 1:
-                transaction_prediction = 'Transaksi yang anda lakukan tidak aman karena terjadi indikasi penipuan'
-            else:
-                transaction_prediction = 'Transaksi yang anda lakukan aman karena dilakukan secara sah'
-        except ValueError:
-            transaction_prediction = 'Harap masukkan nilai numerik yang valid untuk semua input'
-        
-        st.success(transaction_prediction)
-
-# Halaman upload file (untuk transaksi biasa)
-elif selected == 'File Upload':
-    st.title('Prediksi Transaksi - Upload File Excel')
-
-    st.markdown("**Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS**")
-    st.markdown("**TX_AMOUNT:** Data jumlah transaksi")
-    st.markdown("**TX_TIME_SECONDS:** Data jeda waktu transaksi dalam detik")
-    st.markdown("**NOTE:** Beri nama kolom sesuai keterangan di atas dan gunakan tanda titik (.) sebagai koma (,)")
-
-    uploaded_file = st.file_uploader("", type=["xlsx"])
-
-    if uploaded_file is not None:
-        try:
-            data = pd.read_excel(uploaded_file)
-            st.write("Data yang diupload untuk prediksi transaksi biasa:")
-            st.write(data)
-
-            if 'TX_AMOUNT' in data.columns and 'TX_TIME_SECONDS' in data.columns:
-                user_inputs = data[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
-                predictions = trans_model.predict(user_inputs)
-
-                data['Prediction'] = predictions
-                data['Prediction'] = data['Prediction'].apply(lambda x: 'Transaksi tidak aman (indikasi penipuan)' if x == 1 else 'Transaksi aman')
-
-                st.write("Hasil Prediksi:")
-                st.write(data)
-
-                # Menampilkan tabel statistik deskriptif
-                st.subheader('Karakteristik Jeda Waktu Detik')
-                st.write(data['TX_TIME_SECONDS'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
-
-                st.subheader('Karakteristik Jumlah Transaksi')
-                st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
-
-                # Dropdown untuk memilih tipe plot
-                plot_type = st.selectbox('**Pilih jenis plot:**', ['Histogram', 'Boxplot'])
-
-                if plot_type == 'Histogram':
-                    # Menampilkan histogram
-                    st.subheader('Distribusi Jumlah Transaksi')
-                    fig_hist, ax_hist = plt.subplots()
-                    sns.histplot(data['TX_AMOUNT'], kde=True, ax=ax_hist, color='lightcoral')
-                    ax_hist.set_xlabel('TX_AMOUNT')
-                    ax_hist.set_ylabel('Frekuensi')
-                    st.pyplot(fig_hist)
-                    st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berbentuk tidak normal.")
-
-                    st.subheader('Distribusi Jeda Waktu Transaksi (Detik)')
-                    fig_hist_time, ax_hist_time = plt.subplots()
-                    sns.histplot(data['TX_TIME_SECONDS'], kde=True, ax=ax_hist_time, color='lightcoral')
-                    ax_hist_time.set_xlabel('TX_TIME_SECONDS')
-                    ax_hist_time.set_ylabel('Frekuensi')
-                    st.pyplot(fig_hist_time)
-                    st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berbentuk tidak normal.")
-
-                elif plot_type == 'Boxplot':
-                    # Menampilkan boxplot
-                    st.subheader('Boxplot Jumlah Transaksi')
-                    fig_box, ax_box = plt.subplots()
-                    sns.boxplot(data['TX_AMOUNT'], ax=ax_box, color='lightcoral')
-                    ax_box.set_xlabel('TX_AMOUNT')
-                    st.pyplot(fig_box)
-                    st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
-
-                    st.subheader('Boxplot Jeda Waktu Transaksi (Detik)')
-                    fig_box_time, ax_box_time = plt.subplots()
-                    sns.boxplot(data['TX_TIME_SECONDS'], ax=ax_box_time, color='lightcoral')
-                    ax_box_time.set_xlabel('TX_TIME_SECONDS')
-                    st.pyplot(fig_box_time)
-                    st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
-
-                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
-                output = io.BytesIO()
-                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                    data.to_excel(writer, index=False, sheet_name='Sheet1')
-                
-                output.seek(0)
-
-                st.download_button(
-                    label="Download hasil prediksi",
-                    data=output,
-                    file_name='hasil_prediksi.xlsx'
-                )
-
-            else:
-                st.error('File tidak memiliki kolom yang diperlukan: TX_AMOUNT, TX_TIME_SECONDS')
-        except Exception as e:
-            st.error(f"Error: {e}")
+    # Your data visualization content here
 
 # Halaman pemodelan Random Forest
 elif selected == 'Pemodelan Random Forest':
