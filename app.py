@@ -107,37 +107,42 @@ elif selected == 'File Upload':
                 st.subheader('Karakteristik Jumlah Transaksi')
                 st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
 
-                # Menampilkan histogram
-                st.subheader('Distribusi Jumlah Transaksi')
-                fig_hist, ax_hist = plt.subplots()
-                sns.histplot(data['TX_AMOUNT'], kde=True, ax=ax_hist)
-                ax_hist.set_xlabel('TX_AMOUNT')
-                ax_hist.set_ylabel('Frekuensi')
-                st.pyplot(fig_hist)
-                st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berbentuk tidak normal.")
+                # Dropdown untuk memilih tipe plot
+                plot_type = st.selectbox('Pilih jenis plot:', ['Histogram', 'Boxplot'])
 
-                st.subheader('Distribusi Jeda Waktu Transaksi (Detik)')
-                fig_hist_time, ax_hist_time = plt.subplots()
-                sns.histplot(data['TX_TIME_SECONDS'], kde=True, ax=ax_hist_time)
-                ax_hist_time.set_xlabel('TX_TIME_SECONDS')
-                ax_hist_time.set_ylabel('Frekuensi')
-                st.pyplot(fig_hist_time)
-                st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berbentuk tidak normal.")
+                if plot_type == 'Histogram':
+                    # Menampilkan histogram
+                    st.subheader('Distribusi Jumlah Transaksi')
+                    fig_hist, ax_hist = plt.subplots()
+                    sns.histplot(data['TX_AMOUNT'], kde=True, ax=ax_hist, color='lightcoral')
+                    ax_hist.set_xlabel('TX_AMOUNT')
+                    ax_hist.set_ylabel('Frekuensi')
+                    st.pyplot(fig_hist)
+                    st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berbentuk tidak normal.")
 
-                # Menampilkan boxplot
-                st.subheader('Boxplot Jumlah Transaksi')
-                fig_box, ax_box = plt.subplots()
-                sns.boxplot(data['TX_AMOUNT'], ax=ax_box)
-                ax_box.set_xlabel('TX_AMOUNT')
-                st.pyplot(fig_box)
-                st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
+                    st.subheader('Distribusi Jeda Waktu Transaksi (Detik)')
+                    fig_hist_time, ax_hist_time = plt.subplots()
+                    sns.histplot(data['TX_TIME_SECONDS'], kde=True, ax=ax_hist_time, color='lightcoral')
+                    ax_hist_time.set_xlabel('TX_TIME_SECONDS')
+                    ax_hist_time.set_ylabel('Frekuensi')
+                    st.pyplot(fig_hist_time)
+                    st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berbentuk tidak normal.")
 
-                st.subheader('Boxplot Jeda Waktu Transaksi (Detik)')
-                fig_box_time, ax_box_time = plt.subplots()
-                sns.boxplot(data['TX_TIME_SECONDS'], ax=ax_box_time)
-                ax_box_time.set_xlabel('TX_TIME_SECONDS')
-                st.pyplot(fig_box_time)
-                st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
+                elif plot_type == 'Boxplot':
+                    # Menampilkan boxplot
+                    st.subheader('Boxplot Jumlah Transaksi')
+                    fig_box, ax_box = plt.subplots()
+                    sns.boxplot(data['TX_AMOUNT'], ax=ax_box, color='lightcoral')
+                    ax_box.set_xlabel('TX_AMOUNT')
+                    st.pyplot(fig_box)
+                    st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
+
+                    st.subheader('Boxplot Jeda Waktu Transaksi (Detik)')
+                    fig_box_time, ax_box_time = plt.subplots()
+                    sns.boxplot(data['TX_TIME_SECONDS'], ax=ax_box_time, color='lightcoral')
+                    ax_box_time.set_xlabel('TX_TIME_SECONDS')
+                    st.pyplot(fig_box_time)
+                    st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
 
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
                 output = io.BytesIO()
@@ -200,7 +205,7 @@ elif selected == 'Pemodelan Random Forest':
                 st.subheader('Confusion Matrix')
                 cm_rf = confusion_matrix(true_labels_rf, predictions_rf)
                 plt.figure(figsize=(6, 4))
-                sns.heatmap(cm_rf, annot=True, cmap='Blues', fmt='g')
+                sns.heatmap(cm_rf, annot=True, cmap='lightcoral', fmt='g')
                 plt.xlabel('Predicted')
                 plt.ylabel('Actual')
                 st.pyplot()
