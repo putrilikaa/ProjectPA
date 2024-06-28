@@ -54,7 +54,7 @@ with st.sidebar:
 
 # Halaman input manual
 if selected == 'Manual Input':
-    st.title('Transaction Prediction - Manual Input')
+    st.title('Prediksi Transaksi - Input Manual')
 
     col1, col2 = st.columns(2)
 
@@ -65,7 +65,7 @@ if selected == 'Manual Input':
 
     transaction_prediction = ''
 
-    if st.button('Transaction Prediction Result'):
+    if st.button('Hasil Prediksi'):
         try:
             user_input = [float(TX_AMOUNT), float(TX_TIME_SECONDS)]
             transaction_diagnosis = trans_model.predict([user_input])
@@ -80,11 +80,11 @@ if selected == 'Manual Input':
 
 # Halaman upload file (untuk transaksi biasa)
 elif selected == 'File Upload':
-    st.title('Transaction Prediction - File Upload')
+    st.title('Prediksi Transaksi - Upload File Excel')
 
     st.write("Halaman ini digunakan untuk memprediksi status transaksi yang anda lakukan sah atau terindikasi penipuan")
 
-    uploaded_file = st.file_uploader('Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS', type=["xlsx"])
+    uploaded_file = st.file_uploader('**Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS**', type=["xlsx"])
 
     if uploaded_file is not None:
         try:
@@ -168,9 +168,9 @@ elif selected == 'File Upload':
 elif selected == 'Pemodelan Random Forest':
     st.title('Pemodelan Random Forest')
 
-    st.write("Halaman ini digunakan untuk menghasilkan model dengan menggunakan algoritma random forest")
+    st.write("Halaman ini digunakan untuk menghasilkan model dengan menggunakan algoritma ***Random Forest***")
 
-    uploaded_file_rf = st.file_uploader('Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan TX_FRAUD', type=["xlsx"])
+    uploaded_file_rf = st.file_uploader('**Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan TX_FRAUD**', type=["xlsx"])
 
     if uploaded_file_rf is not None:
         try:
@@ -241,7 +241,7 @@ elif selected == 'Info':
     st.title('Informasi Dashboard')
     
     st.write("""
-    *Random Forest* adalah salah satu algoritma machine learning yang umum digunakan dalam permasalahan klasifikasi atau prediksi. Pada kasus ini digunakan untuk memprediksi mana transaksi yang termasuk ke dalam kelas penipuan dan sah. Prediksi didasarkan pada jumlah transaksi dan jeda waktu transaksi (detik).
+    Dashboard ini menggunakan algoritma ***Random Forest*** yang merupakan salah satu algoritma *machine learning* yang umum digunakan dalam permasalahan klasifikasi atau prediksi. Pada kasus ini digunakan untuk memprediksi mana transaksi yang termasuk ke dalam kelas penipuan dan sah. Prediksi didasarkan pada jumlah transaksi dan jeda waktu transaksi (detik). Ilustrasinya adalah sebagai berikut.
     """)
 
     # Menampilkan gambar Random Forest dengan st.image dan mengatur penempatan dengan CSS
