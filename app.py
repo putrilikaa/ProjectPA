@@ -44,10 +44,11 @@ with st.sidebar:
         [
             'Manual Input',
             'File Upload',
+            'Pemodelan Random Forest',
             'Info'
         ],
         menu_icon='money-fill',
-        icons=['pencil', 'upload', 'info-circle'],
+        icons=['pencil', 'upload', 'bar-chart', 'info-circle'],
         default_index=0
     )
 
@@ -89,9 +90,8 @@ elif selected == 'File Upload':
             st.write("Data yang diupload:")
             st.write(data)
 
-            if 'TX_AMOUNT' in data.columns and 'TX_TIME_SECONDS' in data.columns and 'FRAUD' in data.columns:
+            if 'TX_AMOUNT' in data.columns and 'TX_TIME_SECONDS' in data.columns:
                 user_inputs = data[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
-                true_labels = data['FRAUD'].astype(int)
                 predictions = trans_model.predict(user_inputs)
 
                 data['Prediction'] = predictions
@@ -131,6 +131,47 @@ elif selected == 'File Upload':
                 ax[1, 1].set_xlabel('TX_TIME_SECONDS')
 
                 st.pyplot(fig)
+
+                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
+                output = io.BytesIO()
+                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                    data.to_excel(writer, index=False, sheet_name='Sheet1')
+                
+                output.seek(0)
+
+                st.download_button(
+                    label="Download hasil prediksi",
+                    data=output,
+                    file_name='hasil_prediksi.xlsx'
+                )
+
+            else:
+                st.error('File tidak memiliki kolom yang diperlukan: TX_AMOUNT, TX_TIME_SECONDS')
+        except Exception as e:
+            st.error(f"Error: {e}")
+
+# Halaman pemodelan Random Forest
+elif selected == 'Pemodelan Random Forest':
+    st.title('Pemodelan Random Forest')
+
+    uploaded_file = st.file_uploader("Upload file Excel dengan data transaksi", type=["xlsx"])
+
+    if uploaded_file is not None:
+        try:
+            data = pd.read_excel(uploaded_file)
+            st.write("Data yang diupload:")
+            st.write(data)
+
+            if 'TX_AMOUNT' in data.columns and 'TX_TIME_SECONDS' in data.columns and 'FRAUD' in data.columns:
+                user_inputs = data[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
+                true_labels = data['FRAUD'].astype(int)
+                predictions = trans_model.predict(user_inputs)
+
+                data['Prediction'] = predictions
+                data['Prediction'] = data['Prediction'].apply(lambda x: 'Transaksi tidak aman (indikasi penipuan)' if x == 1 else 'Transaksi aman')
+
+                st.write("Hasil Prediksi:")
+                st.write(data)
 
                 # Menampilkan metrik evaluasi
                 st.subheader('Metrik Evaluasi Model')
@@ -199,3 +240,4 @@ elif selected == 'Info':
     - *AUC ROC (Area Under the Receiver Operating Characteristic Curve)* mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
     - *ROC (Receiver Operating Characteristic Curve)* adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
     """)
+
