@@ -6,6 +6,7 @@ import io
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
+from streamlit_option_menu import option_menu
 
 # Konfigurasi halaman Streamlit
 st.set_page_config(
@@ -15,7 +16,7 @@ st.set_page_config(
 )
 
 # Fungsi untuk memuat model terkompresi
-@st.cache_resource
+@st.cache(allow_output_mutation=True)
 def load_compressed_model(file_path):
     try:
         with lzma.open(file_path, 'rb') as file:
@@ -37,15 +38,17 @@ if trans_model is None:
 
 # Sidebar untuk navigasi
 with st.sidebar:
-    selected = st.radio(
-        'Navigasi',
-        options=[
+    selected = option_menu(
+        'Prediksi Transaksi',
+        [
             'Manual Input',
             'File Upload',
             'Pemodelan Random Forest',
             'Info'
         ],
-        format_func=lambda x: 'Input Manual' if x == 'Manual Input' else ('Upload File' if x == 'File Upload' else ('Pemodelan Random Forest' if x == 'Pemodelan Random Forest' else 'Informasi'))
+        menu_icon='money-fill',
+        icons=['pencil', 'upload', 'bar-chart', 'info-circle'],
+        default_index=0
     )
 
 # Halaman input manual
@@ -214,16 +217,16 @@ elif selected == 'Pemodelan Random Forest':
                 - **False Negative (FN)**: Transaksi yang sebenarnya penipuan tetapi diprediksi sebagai sah.
                 """)
 
-                st.markdown(f"Transaksi yang sebenarnya sah dan diprediksi sebagai sah adalah sebesar {cm_rf[0, 0]} data")
-                st.markdown(f"Transaksi yang sebenarnya sah tetapi diprediksi sebagai penipuan adalah sebesar {cm_rf[0, 1]} data")
-                st.markdown(f"Transaksi yang sebenarnya penipuan dan diprediksi sebagai penipuan adalah sebesar {cm_rf[1, 1]} data")
-                st.markdown(f"Transaksi yang sebenarnya penipuan tetapi diprediksi sebagai sah adalah sebesar {cm_rf[1, 0]} data")
-
                 plt.figure(figsize=(6, 4))
                 sns.heatmap(cm_rf, annot=True, cmap='Reds', fmt='g')  # fmt='g' untuk menampilkan angka tanpa desimal jika angka integer
                 plt.xlabel('Prediksi')
                 plt.ylabel('Aktual')
                 st.pyplot()
+
+                st.markdown(f"Transaksi yang sebenarnya sah dan diprediksi sebagai sah adalah sebesar {cm_rf[0, 0]} data")
+                st.markdown(f"Transaksi yang sebenarnya sah tetapi diprediksi sebagai penipuan adalah sebesar {cm_rf[0, 1]} data")
+                st.markdown(f"Transaksi yang sebenarnya penipuan dan diprediksi sebagai penipuan adalah sebesar {cm_rf[1, 1]} data")
+                st.markdown(f"Transaksi yang sebenarnya penipuan tetapi diprediksi sebagai sah adalah sebesar {cm_rf[1, 0]} data")
 
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
                 output_rf = io.BytesIO()
