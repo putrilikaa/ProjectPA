@@ -82,7 +82,9 @@ if selected == 'Manual Input':
 elif selected == 'File Upload':
     st.title('Transaction Prediction - File Upload')
 
-    uploaded_file = st.file_uploader("**Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS**", type=["xlsx"])
+    st.write("Halaman ini digunakan untuk memprediksi status transaksi yang anda lakukan sah atau terindikasi penipuan")
+
+    uploaded_file = st.file_uploader('Upload file excel yang berisi data TX_AMOUNT dan TX_TIME_SECONDS', type=["xlsx"])
 
     if uploaded_file is not None:
         try:
@@ -108,7 +110,7 @@ elif selected == 'File Upload':
                 st.write(data['TX_AMOUNT'].describe().to_frame().T[['mean', '50%', 'std']].rename(columns={'mean': 'Rata-Rata', '50%': 'Median', 'std': 'Varians'}))
 
                 # Dropdown untuk memilih tipe plot
-                plot_type = st.selectbox('**Pilih jenis plot:**', ['Histogram', 'Boxplot'])
+                plot_type = st.selectbox('Pilih jenis plot:', ['Histogram', 'Boxplot'])
 
                 if plot_type == 'Histogram':
                     # Menampilkan histogram
@@ -166,9 +168,9 @@ elif selected == 'File Upload':
 elif selected == 'Pemodelan Random Forest':
     st.title('Pemodelan Random Forest')
 
-    st.write("Halaman ini digunakan untuk evaluasi model menggunakan data yang berbeda, tidak terkait dengan data yang diupload sebelumnya.")
+    st.write("Halaman ini digunakan untuk menghasilkan model dengan menggunakan algoritma random forest")
 
-    uploaded_file_rf = st.file_uploader("**Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan TX_FRAUD**", type=["xlsx"])
+    uploaded_file_rf = st.file_uploader('Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan TX_FRAUD', type=["xlsx"])
 
     if uploaded_file_rf is not None:
         try:
