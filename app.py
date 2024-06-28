@@ -168,7 +168,7 @@ elif selected == 'Pemodelan Random Forest':
 
     st.write("Halaman ini digunakan untuk evaluasi model menggunakan data yang berbeda, tidak terkait dengan data yang diupload sebelumnya.")
 
-    uploaded_file_rf = st.file_uploader("**Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan FRAUD**", type=["xlsx"])
+    uploaded_file_rf = st.file_uploader("**Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan TX_FRAUD**", type=["xlsx"])
 
     if uploaded_file_rf is not None:
         try:
@@ -176,9 +176,9 @@ elif selected == 'Pemodelan Random Forest':
             st.write("Data yang diupload untuk evaluasi model:")
             st.write(data_rf)
 
-            if 'TX_AMOUNT' in data_rf.columns and 'TX_TIME_SECONDS' in data_rf.columns and 'FRAUD' in data_rf.columns:
+            if 'TX_AMOUNT' in data_rf.columns and 'TX_TIME_SECONDS' in data_rf.columns and 'TX_FRAUD' in data_rf.columns:
                 user_inputs_rf = data_rf[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
-                true_labels_rf = data_rf['FRAUD'].astype(int)
+                true_labels_rf = data_rf['TX_FRAUD'].astype(int)
                 predictions_rf = trans_model.predict(user_inputs_rf)
 
                 data_rf['Prediction'] = predictions_rf
@@ -224,7 +224,7 @@ elif selected == 'Pemodelan Random Forest':
                 )
 
             else:
-                st.error('File tidak memiliki kolom yang diperlukan: TX_AMOUNT, TX_TIME_SECONDS, FRAUD')
+                st.error('File tidak memiliki kolom yang diperlukan: TX_AMOUNT, TX_TIME_SECONDS, TX_FRAUD')
         except Exception as e:
             st.error(f"Error: {e}")
 
