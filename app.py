@@ -48,6 +48,18 @@ with st.sidebar:
         format_func=lambda x: 'Manual Input' if x == 'Manual Input' else ('File Upload' if x == 'File Upload' else ('Pemodelan Random Forest' if x == 'Pemodelan Random Forest' else 'Info'))
     )
 
+    # Mengubah warna sidebar menjadi merah kembali
+    st.markdown(
+        """
+        <style>
+        .sidebar .sidebar-content {
+            background-color: #ff0000; /* Ubah sesuai dengan warna merah yang diinginkan */
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
 # Halaman input manual
 if selected == 'Manual Input':
     st.title('Prediksi Transaksi - Input Manual')
