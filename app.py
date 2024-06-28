@@ -114,7 +114,7 @@ elif selected == 'File Upload':
                     # Menampilkan histogram
                     st.subheader('Distribusi Jumlah Transaksi')
                     fig_hist, ax_hist = plt.subplots()
-                    sns.histplot(data['TX_AMOUNT'], kde=True, ax=ax_hist, color='lightcoral')
+                    sns.histplot(data['TX_AMOUNT'], kde=True, ax=ax_hist)
                     ax_hist.set_xlabel('TX_AMOUNT')
                     ax_hist.set_ylabel('Frekuensi')
                     st.pyplot(fig_hist)
@@ -122,7 +122,7 @@ elif selected == 'File Upload':
 
                     st.subheader('Distribusi Jeda Waktu Transaksi (Detik)')
                     fig_hist_time, ax_hist_time = plt.subplots()
-                    sns.histplot(data['TX_TIME_SECONDS'], kde=True, ax=ax_hist_time, color='lightcoral')
+                    sns.histplot(data['TX_TIME_SECONDS'], kde=True, ax=ax_hist_time)
                     ax_hist_time.set_xlabel('TX_TIME_SECONDS')
                     ax_hist_time.set_ylabel('Frekuensi')
                     st.pyplot(fig_hist_time)
@@ -132,14 +132,14 @@ elif selected == 'File Upload':
                     # Menampilkan boxplot
                     st.subheader('Boxplot Jumlah Transaksi')
                     fig_box, ax_box = plt.subplots()
-                    sns.boxplot(data['TX_AMOUNT'], ax=ax_box, color='lightcoral')
+                    sns.boxplot(data['TX_AMOUNT'], ax=ax_box)
                     ax_box.set_xlabel('TX_AMOUNT')
                     st.pyplot(fig_box)
                     st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
 
                     st.subheader('Boxplot Jeda Waktu Transaksi (Detik)')
                     fig_box_time, ax_box_time = plt.subplots()
-                    sns.boxplot(data['TX_TIME_SECONDS'], ax=ax_box_time, color='lightcoral')
+                    sns.boxplot(data['TX_TIME_SECONDS'], ax=ax_box_time)
                     ax_box_time.set_xlabel('TX_TIME_SECONDS')
                     st.pyplot(fig_box_time)
                     st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
@@ -205,16 +205,16 @@ elif selected == 'Pemodelan Random Forest':
                 st.subheader('Confusion Matrix')
                 cm_rf = confusion_matrix(true_labels_rf, predictions_rf)
                 plt.figure(figsize=(6, 4))
-                sns.heatmap(cm_rf, annot=True, cmap='Reds', fmt='g')
+                sns.heatmap(cm_rf, annot=True, fmt='g')
                 plt.xlabel('Predicted')
                 plt.ylabel('Actual')
                 st.pyplot()
-                
+
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
                 output_rf = io.BytesIO()
                 with pd.ExcelWriter(output_rf, engine='xlsxwriter') as writer:
                     data_rf.to_excel(writer, index=False, sheet_name='Sheet1')
-                
+
                 output_rf.seek(0)
 
                 st.download_button(
@@ -231,7 +231,7 @@ elif selected == 'Pemodelan Random Forest':
 # Halaman informasi
 elif selected == 'Info':
     st.title('Informasi Dashboard')
-    
+
     st.write("""
     *Random Forest* adalah salah satu algoritma machine learning yang umum digunakan dalam permasalahan klasifikasi atau prediksi. Pada kasus ini digunakan untuk memprediksi mana transaksi yang termasuk ke dalam kelas penipuan dan sah. Prediksi didasarkan pada jumlah transaksi dan jeda waktu transaksi (detik).
     """)
@@ -250,10 +250,10 @@ elif selected == 'Info':
     """, unsafe_allow_html=True)
 
     st.markdown('<img src="https://cdn.prod.website-files.com/61af164800e38cf1b6c60b55/64c0c20d61bda9e68f630468_Random%20forest.webp" alt="Random Forest" width="400" class="center">', unsafe_allow_html=True)
-    
+
     st.write("""
     Terdapat beberapa pengukuran yang biasa digunakan untuk menentukan seberapa baik model, antara lain:
-    
+
     - *Spesifisitas (Specificity)* mengukur kemampuan model untuk dengan benar mengidentifikasi negatif sejati (true negatives) di antara semua kasus yang sebenarnya negatif.
     - *Sensitivitas (Sensitivity)* mengukur kemampuan model untuk dengan benar mengidentifikasi positif sejati (true positives) di antara semua kasus yang sebenarnya positif.
     - *Akurasi (Accuracy)* mengukur seberapa sering model membuat prediksi yang benar, baik untuk kasus positif maupun negatif.
