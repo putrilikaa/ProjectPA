@@ -282,3 +282,4 @@ elif selected == 'Info':
     - **ROC (Receiver Operating Characteristic Curve)** adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
     """)
 
+# Tambahkan bagian untuk menyalin informasi ini ke dalam sistem bio
