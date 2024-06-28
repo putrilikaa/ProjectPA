@@ -64,14 +64,14 @@ if selected == 'Manual Input':
 
     transaction_prediction = ''
 
-    if st.button('Transaction Prediction Result'):
+    if st.button('Hasil Prediksi'):
         try:
             user_input = [float(TX_AMOUNT), float(TX_TIME_SECONDS)]
             transaction_diagnosis = trans_model.predict([user_input])
             if transaction_diagnosis[0] == 1:
-                transaction_prediction = 'Transaksi anda tidak aman karena terjadi indikasi penipuan'
+                transaction_prediction = 'Transaksi yang anda lakukan tidak aman karena terjadi indikasi penipuan'
             else:
-                transaction_prediction = 'Transaksi anda aman karena dilakukan secara sah'
+                transaction_prediction = 'Transaksi yang anda lakukan anda aman karena dilakukan secara sah'
         except ValueError:
             transaction_prediction = 'Harap masukkan nilai numerik yang valid untuk semua input'
         
