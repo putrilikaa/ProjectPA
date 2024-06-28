@@ -179,16 +179,22 @@ elif selected == 'Pemodelan Random Forest':
                 accuracy = accuracy_score(true_labels, predictions)
                 auc = roc_auc_score(true_labels, predictions)
                 cm = confusion_matrix(true_labels, predictions)
-                report = classification_report(true_labels, predictions, output_dict=True)
+                sensitivity = cm[1,1] / (cm[1,1] + cm[1,0])
+                specificity = cm[0,0] / (cm[0,0] + cm[0,1])
 
                 st.write(f"**Akurasi**: {accuracy:.2f}")
+                st.write(f"**Sensitivitas**: {sensitivity:.2f}")
+                st.write(f"**Spesifisitas**: {specificity:.2f}")
                 st.write(f"**AUC**: {auc:.2f}")
 
+                # Menampilkan confusion matrix sebagai grafik berwarna
                 st.write("**Confusion Matrix**:")
-                st.write(cm)
-
-                st.write("**Classification Report**:")
-                st.json(report)
+                fig, ax = plt.subplots()
+                sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax)
+                ax.set_xlabel('Predicted')
+                ax.set_ylabel('Actual')
+                ax.set_title('Confusion Matrix')
+                st.pyplot(fig)
 
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
                 output = io.BytesIO()
@@ -240,4 +246,3 @@ elif selected == 'Info':
     - *AUC ROC (Area Under the Receiver Operating Characteristic Curve)* mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
     - *ROC (Receiver Operating Characteristic Curve)* adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
     """)
-
