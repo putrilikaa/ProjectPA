@@ -37,10 +37,15 @@ if trans_model is None:
 
 # Sidebar untuk navigasi
 with st.sidebar:
-    selected = st.selectbox(
-        'Navigasi',
-        ['Manual Input', 'File Upload', 'Pemodelan Random Forest', 'Info'],
-        index=2
+    selected = st.radio(
+        'Prediksi Transaksi',
+        options=[
+            'Manual Input',
+            'File Upload',
+            'Pemodelan Random Forest',
+            'Info'
+        ],
+        format_func=lambda x: 'Manual Input' if x == 'Manual Input' else ('File Upload' if x == 'File Upload' else ('Pemodelan Random Forest' if x == 'Pemodelan Random Forest' else 'Info'))
     )
 
 # Halaman input manual
