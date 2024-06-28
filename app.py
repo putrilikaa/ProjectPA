@@ -6,7 +6,8 @@ import pandas as pd
 import io
 import matplotlib.pyplot as plt
 import seaborn as sns
-import xlsxwriter  # Mengganti openpyxl dengan xlsxwriter
+import xlsxwriter
+from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score, roc_curve, classification_report
 
 # Konfigurasi halaman Streamlit
 st.set_page_config(
@@ -88,8 +89,9 @@ elif selected == 'File Upload':
             st.write("Data yang diupload:")
             st.write(data)
 
-            if 'TX_AMOUNT' in data.columns and 'TX_TIME_SECONDS' in data.columns:
+            if 'TX_AMOUNT' in data.columns and 'TX_TIME_SECONDS' in data.columns and 'FRAUD' in data.columns:
                 user_inputs = data[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
+                true_labels = data['FRAUD'].astype(int)
                 predictions = trans_model.predict(user_inputs)
 
                 data['Prediction'] = predictions
@@ -130,6 +132,23 @@ elif selected == 'File Upload':
 
                 st.pyplot(fig)
 
+                # Menampilkan metrik evaluasi
+                st.subheader('Metrik Evaluasi Model')
+
+                accuracy = accuracy_score(true_labels, predictions)
+                auc = roc_auc_score(true_labels, predictions)
+                cm = confusion_matrix(true_labels, predictions)
+                report = classification_report(true_labels, predictions, output_dict=True)
+
+                st.write(f"**Akurasi**: {accuracy:.2f}")
+                st.write(f"**AUC**: {auc:.2f}")
+
+                st.write("**Confusion Matrix**:")
+                st.write(cm)
+
+                st.write("**Classification Report**:")
+                st.json(report)
+
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
                 output = io.BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
@@ -144,7 +163,7 @@ elif selected == 'File Upload':
                 )
 
             else:
-                st.error('File tidak memiliki kolom yang diperlukan: TX_AMOUNT, TX_TIME_SECONDS')
+                st.error('File tidak memiliki kolom yang diperlukan: TX_AMOUNT, TX_TIME_SECONDS, FRAUD')
         except Exception as e:
             st.error(f"Error: {e}")
 
