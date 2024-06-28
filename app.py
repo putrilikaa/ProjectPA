@@ -209,6 +209,12 @@ elif selected == 'Pemodelan Random Forest':
                 plt.xlabel('Predicted')
                 plt.ylabel('Actual')
                 st.pyplot()
+
+                # Menambahkan penjelasan di bawah Confusion Matrix
+                st.markdown(f"Transaksi yang sebenarnya sah dan diprediksi sebagai sah adalah sebesar {cm_rf[0, 0]} data")
+                st.markdown(f"Transaksi yang sebenarnya sah tetapi diprediksi sebagai penipuan adalah sebesar {cm_rf[0, 1]} data")
+                st.markdown(f"Transaksi yang sebenarnya penipuan dan diprediksi sebagai penipuan adalah sebesar {cm_rf[1, 1]} data")
+                st.markdown(f"Transaksi yang sebenarnya penipuan tetapi diprediksi sebagai sah adalah sebesar {cm_rf[1, 0]} data")
                 
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
                 output_rf = io.BytesIO()
