@@ -6,7 +6,6 @@ import pandas as pd
 import io
 import matplotlib.pyplot as plt
 import seaborn as sns
-import xlsxwriter
 from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
 
 # Konfigurasi halaman Streamlit
@@ -171,7 +170,9 @@ elif selected == 'File Upload':
 elif selected == 'Pemodelan Random Forest':
     st.title('Pemodelan Random Forest')
 
-    st.write("Halaman ini digunakan untuk evaluasi model menggunakan data yang berbeda, tidak terkait dengan data yang diupload sebelumnya.")
+    st.write("""
+    Halaman ini digunakan untuk evaluasi model menggunakan pemodelan Random Forest. Data yang digunakan di sini tidak terkait dengan data yang diupload pada halaman sebelumnya.
+    """)
 
     st.markdown("**Upload file excel yang berisi data TX_AMOUNT, TX_TIME_SECONDS dan TX_FRAUD**")
     st.markdown("**TX_AMOUNT:** Data jumlah transaksi")
