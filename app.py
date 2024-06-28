@@ -48,6 +48,21 @@ with st.sidebar:
         format_func=lambda x: 'Manual Input' if x == 'Manual Input' else ('File Upload' if x == 'File Upload' else ('Pemodelan Random Forest' if x == 'Pemodelan Random Forest' else 'Info'))
     )
 
+    # Mengubah warna sidebar menjadi merah kembali
+    st.markdown(
+        """
+        <style>
+        [data-testid="stSidebar"][aria-expanded="true"] > div:first-child {
+            background-color: #ff0000;
+        }
+        [data-testid="stSidebar"][aria-expanded="false"] > div:first-child {
+            background-color: #ff0000;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
 # Halaman input manual
 if selected == 'Manual Input':
     st.title('Prediksi Transaksi - Input Manual')
@@ -186,61 +201,27 @@ elif selected == 'Pemodelan Random Forest':
             st.write(data_rf)
 
             if 'TX_AMOUNT' in data_rf.columns and 'TX_TIME_SECONDS' in data_rf.columns and 'TX_FRAUD' in data_rf.columns:
-                user_inputs_rf = data_rf[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
-                true_labels_rf = data_rf['TX_FRAUD'].astype(int)
-                predictions_rf = trans_model.predict(user_inputs_rf)
+                X = data_rf[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
+                y = data_rf['TX_FRAUD'].astype(int)
 
-                data_rf['Prediction'] = predictions_rf
-                data_rf['Prediction'] = data_rf['Prediction'].apply(lambda x: 'Transaksi tidak aman (indikasi penipuan)' if x == 1 else 'Transaksi aman')
+                # Melakukan prediksi
+                y_pred = trans_model.predict(X)
 
-                st.write("Hasil Prediksi:")
-                st.write(data_rf)
+                # Menghitung metrik evaluasi
+                accuracy = accuracy_score(y, y_pred)
+                conf_matrix = confusion_matrix(y, y_pred)
+                roc_auc = roc_auc_score(y, y_pred)
 
-                # Menampilkan metrik evaluasi
-                st.subheader('Metrik Evaluasi Model')
+                st.subheader("Hasil Evaluasi Model")
+                st.write(f"Accuracy: {accuracy:.2f}")
+                st.write(f"ROC-AUC: {roc_auc:.2f}")
 
-                accuracy_rf = accuracy_score(true_labels_rf, predictions_rf)
-                st.write(f'**Akurasi**: {accuracy_rf:.2f}')
-
-                auc_rf = roc_auc_score(true_labels_rf, predictions_rf)
-                st.write(f'**AUC ROC**: {auc_rf:.2f}')
-
-                # Menampilkan Confusion Matrix
-                st.subheader('Confusion Matrix')
-                cm_rf = confusion_matrix(true_labels_rf, predictions_rf)
-                
-                # Tampilkan keterangan di bawah Confusion Matrix
-                st.markdown("""
-                ### Penjelasan Confusion Matrix:
-                - **True Positive (TP)**: Transaksi yang sebenarnya penipuan dan diprediksi sebagai penipuan.
-                - **True Negative (TN)**: Transaksi yang sebenarnya sah dan diprediksi sebagai sah.
-                - **False Positive (FP)**: Transaksi yang sebenarnya sah tetapi diprediksi sebagai penipuan.
-                - **False Negative (FN)**: Transaksi yang sebenarnya penipuan tetapi diprediksi sebagai sah.
-                """)
-
-                st.markdown(f"Transaksi yang sebenarnya sah dan diprediksi sebagai sah adalah sebesar {cm_rf[0, 0]} data")
-                st.markdown(f"Transaksi yang sebenarnya sah tetapi diprediksi sebagai penipuan adalah sebesar {cm_rf[0, 1]} data")
-                st.markdown(f"Transaksi yang sebenarnya penipuan dan diprediksi sebagai penipuan adalah sebesar {cm_rf[1, 1]} data")
-                st.markdown(f"Transaksi yang sebenarnya penipuan tetapi diprediksi sebagai sah adalah sebesar {cm_rf[1, 0]} data")
-
-                plt.figure(figsize=(6, 4))
-                sns.heatmap(cm_rf, annot=True, cmap='Reds', fmt='g')  # fmt='g' untuk menampilkan angka tanpa desimal jika angka integer
-                plt.xlabel('Prediksi')
-                plt.ylabel('Aktual')
-                st.pyplot()
-
-                # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
-                output_rf = io.BytesIO()
-                with pd.ExcelWriter(output_rf, engine='xlsxwriter') as writer:
-                    data_rf.to_excel(writer, index=False, sheet_name='Sheet1')
-                
-                output_rf.seek(0)
-
-                st.download_button(
-                    label="Download hasil prediksi dan evaluasi",
-                    data=output_rf,
-                    file_name='hasil_prediksi_dan_evaluasi.xlsx'
-                )
+                st.subheader("Confusion Matrix")
+                fig_conf, ax_conf = plt.subplots()
+                sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', ax=ax_conf)
+                ax_conf.set_xlabel('Predicted')
+                ax_conf.set_ylabel('Actual')
+                st.pyplot(fig_conf)
 
             else:
                 st.error('File tidak memiliki kolom yang diperlukan: TX_AMOUNT, TX_TIME_SECONDS, TX_FRAUD')
