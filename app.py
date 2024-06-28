@@ -1,5 +1,4 @@
 import streamlit as st
-from streamlit_option_menu import option_menu
 import pickle
 import lzma
 import pandas as pd
@@ -7,6 +6,7 @@ import io
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
+from streamlit_option_menu import option_menu
 
 # Konfigurasi halaman Streamlit
 st.set_page_config(
@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # Fungsi untuk memuat model terkompresi
-@st.cache_resource
+@st.cache(allow_output_mutation=True)
 def load_compressed_model(file_path):
     try:
         with lzma.open(file_path, 'rb') as file:
@@ -122,7 +122,6 @@ elif selected == 'File Upload':
                     ax_hist.set_xlabel('TX_AMOUNT')
                     ax_hist.set_ylabel('Frekuensi')
                     st.pyplot(fig_hist)
-                    st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berbentuk tidak normal.")
 
                     st.subheader('Distribusi Jeda Waktu Transaksi (Detik)')
                     fig_hist_time, ax_hist_time = plt.subplots()
@@ -130,7 +129,6 @@ elif selected == 'File Upload':
                     ax_hist_time.set_xlabel('TX_TIME_SECONDS')
                     ax_hist_time.set_ylabel('Frekuensi')
                     st.pyplot(fig_hist_time)
-                    st.write("Histogram yang berbentuk melengkung seperti lonceng menggambarkan bahwa data berdistribusi normal dan selain itu berbentuk tidak normal.")
 
                 elif plot_type == 'Boxplot':
                     # Menampilkan boxplot
@@ -139,14 +137,12 @@ elif selected == 'File Upload':
                     sns.boxplot(data['TX_AMOUNT'], ax=ax_box, color='lightcoral')
                     ax_box.set_xlabel('TX_AMOUNT')
                     st.pyplot(fig_box)
-                    st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
 
                     st.subheader('Boxplot Jeda Waktu Transaksi (Detik)')
                     fig_box_time, ax_box_time = plt.subplots()
                     sns.boxplot(data['TX_TIME_SECONDS'], ax=ax_box_time, color='lightcoral')
                     ax_box_time.set_xlabel('TX_TIME_SECONDS')
                     st.pyplot(fig_box_time)
-                    st.write("Boxplot yang berbentuk lebar menandakan bahwa penyebaran datanya tinggi dan sebaliknya apabila berbentuk sempit menandakan bahwa penyebaran data rendah. Titik di luar kotak boxplot merupakan data outlier yang nilainya berbeda jauh dari nilai lainnya pada data.")
 
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
                 output = io.BytesIO()
@@ -189,6 +185,9 @@ elif selected == 'Pemodelan Random Forest':
             st.write(data_rf)
 
             if 'TX_AMOUNT' in data_rf.columns and 'TX_TIME_SECONDS' in data_rf.columns and 'TX_FRAUD' in data_rf.columns:
+                if 'Prediction' in data_rf.columns:
+                    data_rf.drop(columns=['Prediction'], inplace=True)
+
                 user_inputs_rf = data_rf[['TX_AMOUNT', 'TX_TIME_SECONDS']].astype(float)
                 true_labels_rf = data_rf['TX_FRAUD'].astype(int)
                 predictions_rf = trans_model.predict(user_inputs_rf)
@@ -211,12 +210,27 @@ elif selected == 'Pemodelan Random Forest':
                 # Menampilkan Confusion Matrix
                 st.subheader('Confusion Matrix')
                 cm_rf = confusion_matrix(true_labels_rf, predictions_rf)
-                plt.figure(figsize=(6, 4))
-                sns.heatmap(cm_rf, annot=True, cmap='Reds', fmt='g')
-                plt.xlabel('Predicted')
-                plt.ylabel('Actual')
-                st.pyplot()
                 
+                # Tampilkan keterangan di bawah Confusion Matrix
+                st.markdown("""
+                ### Penjelasan Confusion Matrix:
+                - **True Positive (TP)**: Transaksi yang sebenarnya penipuan dan diprediksi sebagai penipuan.
+                - **True Negative (TN)**: Transaksi yang sebenarnya sah dan diprediksi sebagai sah.
+                - **False Positive (FP)**: Transaksi yang sebenarnya sah tetapi diprediksi sebagai penipuan.
+                - **False Negative (FN)**: Transaksi yang sebenarnya penipuan tetapi diprediksi sebagai sah.
+                """)
+
+                plt.figure(figsize=(6, 4))
+                sns.heatmap(cm_rf, annot=True, cmap='Reds', fmt='g')  # fmt='g' untuk menampilkan angka tanpa desimal jika angka integer
+                plt.xlabel('Prediksi')
+                plt.ylabel('Aktual')
+                st.pyplot()
+
+                st.markdown(f"Transaksi yang sebenarnya sah dan diprediksi sebagai sah adalah sebesar {cm_rf[0, 0]} data")
+                st.markdown(f"Transaksi yang sebenarnya sah tetapi diprediksi sebagai penipuan adalah sebesar {cm_rf[0, 1]} data")
+                st.markdown(f"Transaksi yang sebenarnya penipuan dan diprediksi sebagai penipuan adalah sebesar {cm_rf[1, 1]} data")
+                st.markdown(f"Transaksi yang sebenarnya penipuan tetapi diprediksi sebagai sah adalah sebesar {cm_rf[1, 0]} data")
+
                 # Mengkonversi DataFrame ke Excel menggunakan xlsxwriter tanpa engine_kwargs
                 output_rf = io.BytesIO()
                 with pd.ExcelWriter(output_rf, engine='xlsxwriter') as writer:
@@ -267,3 +281,4 @@ elif selected == 'Info':
     - **AUC ROC (Area Under the Receiver Operating Characteristic Curve)** mengukur kinerja model klasifikasi pada berbagai threshold keputusan.
     - **ROC (Receiver Operating Characteristic Curve)** adalah grafik yang menggambarkan rasio True Positive Rate (Sensitivitas) terhadap False Positive Rate (1 - Spesifisitas) untuk berbagai nilai threshold.
     """)
+
