@@ -239,7 +239,7 @@ elif selected == 'Info':
     st.title('Informasi Dashboard')
     
     st.write("""
-    **Dashboard ini menggunakan pemodelan dengan algoritma** *Random Forest* yang merupakan salah satu algoritma machine learning yang umum digunakan dalam permasalahan klasifikasi atau prediksi. Pada kasus ini digunakan untuk memprediksi mana transaksi yang termasuk ke dalam kelas penipuan dan sah. Prediksi didasarkan pada jumlah transaksi dan jeda waktu transaksi (detik).
+    Dashboard ini menggunakan pemodelan dengan algoritma ***Random Forest*** yang merupakan salah satu algoritma machine learning yang umum digunakan dalam permasalahan klasifikasi atau prediksi. Pada kasus ini digunakan untuk memprediksi mana transaksi yang termasuk ke dalam kelas penipuan dan sah. Prediksi didasarkan pada jumlah transaksi dan jeda waktu transaksi (detik).
     """)
 
     # Menampilkan gambar Random Forest dengan st.image dan mengatur penempatan dengan CSS
